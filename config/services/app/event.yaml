@@ -1,0 +1,30 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    App\Infrastructure\Event\EventCommandFactory:
+        calls:
+            -   add: ['App\Domain\Event\STLOGA\Registro\EnviarSTLOGARegistro', 'App\Application\Command\Event\STLOGA\RegistrarSTLOGARegistroCommand']
+            -   add: ['App\Domain\Event\Thumbs\Thumbs', 'App\Application\Command\Event\Thumbs\ThumbsCommand']
+            -   add: ['App\Domain\Event\Salesforce\User\UserWeb\BienvenidaSalesforceEvent', 'App\Application\Command\Event\Salesforce\User\UserWeb\BienvenidaSalesforceEventCommand']
+            -   add: ['App\Domain\Event\Salesforce\User\UserWeb\ConfirmarBajaSalesforceEvent', 'App\Application\Command\Event\Salesforce\User\UserWeb\ConfirmarBajaEventSalesforceCommand']
+            -   add: ['App\Domain\Event\Salesforce\User\UserWeb\ConfirmarCambioContrasenaSalesforceEvent', 'App\Application\Command\Event\Salesforce\User\UserWeb\ConfirmarCambioContrasenaSalesforceEventCommand']
+            -   add: ['App\Domain\Event\Salesforce\User\UserWeb\ValidarCambioContrasenaSalesforceEvent', 'App\Application\Command\Event\Salesforce\User\UserWeb\ValidarCambioContrasenaSalesforceEventCommand']
+            -   add: ['App\Domain\Event\Salesforce\User\UserWeb\ValidarCorreoElectronicoSalesforceEvent', 'App\Application\Command\Event\Salesforce\User\UserWeb\ValidarCorreoElectronicoSalesforceEventCommand']
+            -   add: ['App\Domain\Event\Contacto\ContactoPlanetaDeLibros\EnviarContactoPlanetaDeLibrosEvent', 'App\Application\Command\Event\Contacto\PlanetaDeLibros\EnviarContactoPlanetaDeLibrosEventCommand']
+            -   add: ['App\Domain\Event\Contacto\ContactoBookFilmRights\EnviarContactoBookFilmRightsEvent', 'App\Application\Command\Event\Contacto\BookFilmRights\EnviarContactoBookFilmRightsEventCommand']
+            -   add: ['App\Domain\Event\Model\BlogEntrada\BlogEntradaHasBeenPublishedEvent', 'App\Application\Command\Event\Model\BlogEntrada\BlogEntradaHasBeenPublishedCommand']
+            -   add: ['App\Domain\Event\Model\Libro\LibroAlternate\CrearLibroAlternateEvent', 'App\Application\Command\Event\Libro\LibroAlternate\CrearLibroAlternatesCommand']
+            -   add: ['App\Domain\Event\Model\Seudonimo\SeudonimoAlternate\CrearSeudonimoAlternateEvent', 'App\Application\Command\Event\Seudonimo\SeudonimoAlternate\CrearSeudonimoAlternatesCommand']
+            -   add: ['App\Domain\Event\Model\Editorial\EditorialLibrosIndex', 'App\Application\Command\Event\Model\Editorial\EditorialLibrosIndexCommand']
+            ### ElasticSearch Indexing
+            -   add: ['App\Domain\Event\Model\Editorial\ElasticsearchEditorialIndexEvent', 'App\Application\Command\Event\Model\Editorial\ElasticSearchEditorialIndexCommand']
+            -   add: ['App\Domain\Event\Model\Libro\ElasticsearchLibroIndexEvent', 'App\Application\Command\Event\Model\Libro\ElasticSearchLibroIndexCommand']
+            -   add: ['App\Domain\Event\Model\Coleccion\ElasticsearchColeccionIndexEvent', 'App\Application\Command\Event\Model\Coleccion\ElasticSearchColeccionIndexCommand']
+            -   add: ['App\Domain\Event\Model\Tematica\ElasticsearchTematicaIndexEvent', 'App\Application\Command\Event\Model\Tematica\ElasticSearchTematicaIndexCommand']
+            -   add: ['App\Domain\Event\Model\Seudonimo\ElasticsearchSeudonimoIndexEvent', 'App\Application\Command\Event\Model\Seudonimo\ElasticSearchSeudonimoIndexCommand']
+            -   add: ['App\Domain\Event\Model\BlogEntrada\ElasticsearchBlogEntradaIndexEvent', 'App\Application\Command\Event\Model\BlogEntrada\ElasticSearchBlogEntradaIndexCommand']
+            -   add: ['App\Domain\Event\Model\User\ElasticsearchUserIndexEvent', 'App\Application\Command\Event\Model\User\ElasticSearchUserIndexCommand']
+            -   add: ['App\Domain\Event\Model\Serie\ElasticsearchSerieIndexEvent', 'App\Application\Command\Event\Model\Serie\ElasticSearchSerieIndexCommand']

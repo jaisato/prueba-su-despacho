@@ -1,0 +1,21 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+
+    App\Application\Command\:
+        resource: '../../../src/App/Application/Command/**'
+        exclude: '../../../src/App/Application/Command/**/*Command.php'
+        tags:
+            - { name: tactician.handler, typehints: true }
+
+    App\Application\Query\:
+        resource: '../../../src/App/Application/Query/**'
+        exclude: '../../../src/App/Application/Query/**/*Query.php'
+        tags:
+            - { name: tactician.handler, typehints: true }
+
+    App\Application\Service\:
+        resource: '../../../src/App/Application/Service'

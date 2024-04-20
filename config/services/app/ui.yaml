@@ -1,0 +1,9 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  App\Ui\:
+      resource: '../../../src/App/Ui/*'
+      exclude: '../../../src/Ui/{Request}'

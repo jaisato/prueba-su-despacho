@@ -1,0 +1,13 @@
+api_platform:
+    resource: .
+    type: api_platform
+    prefix: /
+
+api_routes:
+    resource: '../../../src/Api/Ui/Controller/'
+    type: annotation
+    prefix: /
+
+api_login:
+    path: /login
+    methods: ['POST']
