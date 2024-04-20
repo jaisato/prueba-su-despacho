@@ -164,6 +164,16 @@ final class Amount
         );
     }
 
+    public function asStringWithCommaAsDecimalSeparator(): string
+    {
+        return number_format(
+            $this->value->getAmount()->toFloat(),
+            2,
+            ',',
+            ''
+        );
+    }
+
     public function asStringWithCommaAsDecimalSeparatorAndThousandSeparator(): string
     {
         return str_replace(',00', '', number_format(
