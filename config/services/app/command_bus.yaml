@@ -1,0 +1,22 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: public
+
+  App\Infrastructure\CommandBus\CommandBusRead:
+    arguments:
+      - '@tactician.commandbus.read'
+
+  App\Infrastructure\CommandBus\CommandBusWrite:
+    arguments:
+      - '@tactician.commandbus.write'
+
+  App\Infrastructure\CommandBus\CommandBusCli:
+    arguments:
+      - '@tactician.commandbus.cli'
+
+  ## Aliases
+  App\Domain\CommandBus\CommandBusRead: '@App\Infrastructure\CommandBus\CommandBusRead'
+  App\Domain\CommandBus\CommandBusWrite: '@App\Infrastructure\CommandBus\CommandBusWrite'
+  App\Domain\CommandBus\CommandBusCli: '@App\Infrastructure\CommandBus\CommandBusCli'

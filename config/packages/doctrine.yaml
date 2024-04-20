@@ -1,0 +1,71 @@
+doctrine:
+    dbal:
+        default_connection: products
+        connections:
+            products:
+                url: '%env(resolve:DATABASE_URL)%'
+        types:
+            vo_date_time: App\Infrastructure\Persistence\Doctrine\ValueObject\DateTimeType
+            vo_description: App\Infrastructure\Persistence\Doctrine\ValueObject\DescriptionType
+            vo_email_address: App\Infrastructure\Persistence\Doctrine\ValueObject\EmailAddressType
+            vo_id: App\Infrastructure\Persistence\Doctrine\ValueObject\IdType
+            vo_amount: App\Infrastructure\Persistence\Doctrine\ValueObject\AmountType
+            vo_name: App\Infrastructure\Persistence\Doctrine\ValueObject\NameType
+            vo_iva: App\Infrastructure\Persistence\Doctrine\ValueObject\IvaType
+            vo_password_hash: App\Infrastructure\Persistence\Doctrine\ValueObject\Security\PasswordHashType
+            # Security\Token
+            vo_clear_text_token: App\Infrastructure\Persistence\Doctrine\ValueObject\Security\Token\ClearTextTokenType
+            vo_token_hash: App\Infrastructure\Persistence\Doctrine\ValueObject\Security\Token\TokenHashType
+            #Rol
+            vo_rol_collection: App\Infrastructure\Persistence\Doctrine\Collection\ValueObject\RolCollectionType
+
+        # IMPORTANT: You MUST configure your server version,
+        # either here or in the DATABASE_URL env var (see .env file)
+        #server_version: '16'
+
+        #profiling_collect_backtrace: '%kernel.debug%'
+        #use_savepoints: true
+
+    orm:
+        auto_generate_proxy_classes: true
+        default_entity_manager: products
+        entity_managers:
+            products:
+                naming_strategy: doctrine.orm.naming_strategy.underscore
+                connection: products
+                mappings:
+                    products:
+                        type: xml
+                        dir: "%kernel.project_dir%/src/App/Infrastructure/Persistence/Doctrine/Mapping/Domain"
+                        prefix: App\Domain
+                        alias: Products
+                dql:
+                    string_functions:
+                        JSON_CONTAINS: Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonContains
+                        DATE: DoctrineExtensions\Query\Mysql\Date
+
+when@test:
+    doctrine:
+        dbal:
+            # "TEST_TOKEN" is typically set by ParaTest
+            dbname_suffix: '_test%env(default::TEST_TOKEN)%'
+
+when@prod:
+    doctrine:
+        orm:
+            auto_generate_proxy_classes: false
+            proxy_dir: '%kernel.build_dir%/doctrine/orm/Proxies'
+            query_cache_driver:
+                type: pool
+                pool: doctrine.system_cache_pool
+            result_cache_driver:
+                type: pool
+                pool: doctrine.result_cache_pool
+
+    framework:
+        cache:
+            pools:
+                doctrine.result_cache_pool:
+                    adapter: cache.app
+                doctrine.system_cache_pool:
+                    adapter: cache.system

@@ -1,0 +1,11 @@
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true
+
+    App\Domain\Service\:
+        resource: '../../../src/App/Domain/Service'
+
+    App\Domain\Repository\:
+        resource: '../../../src/App/Domain/Repository'

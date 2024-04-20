@@ -1,0 +1,62 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    App\Domain\Repository\:
+        resource: '../../../src/App/Domain/Repository'
+
+    App\Domain\Service\:
+        resource: '../../../src/App/Domain/Service'
+
+    App\Infrastructure\Persistence\:
+        resource: '../../../src/App/Infrastructure/Persistence/'
+        exclude:
+            - '../../../src/App/Infrastructure/Persistence/Doctrine/{Mapping,Migrations,ValueObject}'
+            - '../../../src/App/Infrastructure/Persistence/Elastic/{Transformer,Persister,Provider}'
+            - '../../../src/App/Infrastructure/Persistence/InMemory'
+
+    App\Infrastructure\Cli\:
+        resource: '../../../src/App/Infrastructure/Cli/*'
+        tags: ['console.command']
+
+    App\Infrastructure\Service\:
+        resource: '../../../src/App/Infrastructure/Service/*'
+
+    App\Infrastructure\DataFixtures\:
+        resource: '../../../src/App/Infrastructure/DataFixtures/*'
+
+    #App\Infrastructure\DataFixtures\Purger\CustomPurgerFactory:
+    #    tags:
+    #        - { name: 'doctrine.fixtures.purger_factory', alias: 'custom' }
+
+    App\Infrastructure\Security\:
+        resource: '../../../src/App/Infrastructure/Security'
+        exclude: '../../../src/App/Infrastructure/Security/User'
+
+#    App\Infrastructure\Security\OpenApi:
+#        class: App\Infrastructure\Security\OpenApi\JwtDecorator
+#        decorates: 'api_platform.openapi.factory'
+##        tags: ['controller.service_arguments']
+#        arguments: ['@.inner']
+#    App/Infrastructure/Security/OpenApi:
+#        #        synthetic: true
+#        class: App\Infrastructure\Security\OpenApi\JwtDecorator
+#        decorates: 'api_platform.openapi.factory'
+#        arguments: ['@.inner']
+
+    App\Domain\Queue\:
+        resource: '../../../src/App/Domain/Queue'
+
+    App\Infrastructure\Queue\:
+        resource: '../../../src/App/Infrastructure/Queue'
+
+    App\Infrastructure\CommandBus\Middleware\:
+        resource: '../../../src/App/Infrastructure/CommandBus/Middleware/*'
+
+    #App\Domain\Notification\:
+    #    resource: '../../../src/App/Domain/Notification'
+
+    #App\Infrastructure\Notification\:
+    #    resource: '../../../src/App/Infrastructure/Notification'

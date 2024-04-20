@@ -1,0 +1,27 @@
+api_platform:
+    title: 'API Productos'
+    description: 'API para la creación y listado de productos'
+    version: '1.0.0'
+    enable_docs: true
+    mapping:
+        paths:
+            - '%kernel.project_dir%/src/Api/Domain/Dto'
+            - '%kernel.project_dir%/src/App/Infrastructure/Security/OpenApi'
+    patch_formats:
+        json: ['application/merge-patch+json']
+    formats:
+        json: ['application/json']
+        html: ['text/html']
+    swagger:
+        api_keys:
+            user_web:
+                name: Authorization
+                type: header
+        versions: [3]
+    openapi:
+        # The contact information for the exposed API.
+        contact:
+            name: Jairo Sarabia Torres
+            email: jairosarabia@gmail.com
+    exception_to_status:
+        App\Domain\Exception\ValueObject\ValueObjectException: !php/const Symfony\Component\HttpFoundation\Response::HTTP_BAD_REQUEST

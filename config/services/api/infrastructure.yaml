@@ -1,0 +1,30 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+        bind:
+            $env: '%kernel.environment%'
+            $stlopdEndpoint: '%env(STLOPD_END_POINT)%'
+            $stlopdIdForm: '%env(STLOPD_ID_FORM)%'
+            $stlopdIdEmpr: '%env(STLOPD_ID_EMPR)%'
+            $stlopdSociedad: '%env(STLOPD_SOCIEDAD)%'
+            $stlopdDenominacionSocial: '%env(STLOPD_DENOMINACION_SOCIAL)%'
+            $stlopdCif: '%env(STLOPD_CIF)%'
+            $stlopdDireccion: '%env(STLOPD_DIRECCION)%'
+            $stlopdEmail: '%env(STLOPD_EMAIL)%'
+            $stlopdEmailArcop: '%env(STLOPD_EMAIL_ARCOP)%'
+            $stlopdVOri: '%env(STLOPD_V_ORI)%'
+
+    Api\Domain\Service\:
+        resource: '../../../src/Api/Domain/Service'
+
+    Api\Infrastructure\Service\:
+        resource: '../../../src/Api/Infrastructure/Service'
+
+    Api\Infrastructure\Service\OpenApi\OpenApiFactory:
+        decorates: 'api_platform.openapi.factory'
+        autoconfigure: false
+
+    Api\Infrastructure\Security\:
+        resource: '../../../src/Api/Infrastructure/Security'

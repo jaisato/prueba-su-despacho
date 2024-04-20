@@ -1,0 +1,15 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+    bind:
+        $env: '%kernel.environment%'
+
+  Api\Ui\:
+      resource: '../../../src/Api/Ui/*'
+      exclude: '../../../src/Ui/Api/{Request}'
+
+  Api\Ui\Controller\:
+      resource: '../../../src/Api/Ui/Controller/*'
+      tags: [ 'controller.service_arguments' ]
