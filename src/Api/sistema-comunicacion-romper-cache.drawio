@@ -5,10 +5,10 @@
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="GbyjPMjEv9Rc1lk0YDpi-1" value="" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#232F3D;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.generic_database;" vertex="1" parent="1">
-          <mxGeometry x="355" y="333.4" width="59" height="78" as="geometry" />
+          <mxGeometry x="440" y="370" width="69" height="91.22" as="geometry" />
         </mxCell>
         <mxCell id="GbyjPMjEv9Rc1lk0YDpi-2" value="Redis" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
-          <mxGeometry x="355.00000000000006" y="370" width="60" height="30" as="geometry" />
+          <mxGeometry x="444.50000000000006" y="416.4" width="60" height="30" as="geometry" />
         </mxCell>
         <mxCell id="GbyjPMjEv9Rc1lk0YDpi-3" value="" style="sketch=0;aspect=fixed;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#00188D;shape=mxgraph.azure.queue_generic" vertex="1" parent="1">
           <mxGeometry x="300" y="110" width="166.67" height="50" as="geometry" />
@@ -57,6 +57,14 @@
         <mxCell id="GbyjPMjEv9Rc1lk0YDpi-23" value="" style="aspect=fixed;sketch=0;html=1;dashed=0;whitespace=wrap;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#ab1717;strokeColor=#ffffff;points=[[0.005,0.63,0],[0.1,0.2,0],[0.9,0.2,0],[0.5,0,0],[0.995,0.63,0],[0.72,0.99,0],[0.5,1,0],[0.28,0.99,0]];shape=mxgraph.kubernetes.icon2;prIcon=api" vertex="1" parent="1">
           <mxGeometry x="595" y="280" width="80" height="76.8" as="geometry" />
         </mxCell>
+        <mxCell id="GbyjPMjEv9Rc1lk0YDpi-32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.25;exitDx=0;exitDy=0;" edge="1" parent="1" source="GbyjPMjEv9Rc1lk0YDpi-24" target="GbyjPMjEv9Rc1lk0YDpi-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="605" y="330" />
+              <mxPoint x="475" y="330" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
         <mxCell id="GbyjPMjEv9Rc1lk0YDpi-24" value="&lt;div&gt;Consumer (event)&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="605" y="303.40000000000003" width="60" height="30" as="geometry" />
         </mxCell>
@@ -65,16 +73,6 @@
         </mxCell>
         <mxCell id="GbyjPMjEv9Rc1lk0YDpi-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="GbyjPMjEv9Rc1lk0YDpi-22" target="GbyjPMjEv9Rc1lk0YDpi-23">
           <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="GbyjPMjEv9Rc1lk0YDpi-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.525;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="605" y="316.7800000000001" as="sourcePoint" />
-            <mxPoint x="385.9749999999999" y="333.40027709626213" as="targetPoint" />
-            <Array as="points">
-              <mxPoint x="605" y="313" />
-              <mxPoint x="387" y="313" />
-            </Array>
-          </mxGeometry>
         </mxCell>
         <mxCell id="GbyjPMjEv9Rc1lk0YDpi-29" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;Indexación&lt;/h1&gt;&lt;p&gt;En la reindexación de documentos, la api publica un evento asíncrono al RabbitMQ a través del CoreBundle envíando en el evento el &quot;id&quot; y &quot;colección&quot;.&lt;/p&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="190" y="200" width="180" height="120" as="geometry" />
