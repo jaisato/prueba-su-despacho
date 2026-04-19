@@ -43,6 +43,10 @@ final class SignUpController extends AbstractController
      */
     private ValidatorInterface $validator;
 
+    private ?string $errorMessage = null;
+
+    private ?FormErrorDtoCollection $errors = null;
+
     #[Route(
         path: '/users/{tipoForm}',
         name: 'api_signup',
@@ -126,7 +130,7 @@ final class SignUpController extends AbstractController
                 [
                     FormErrorDto::create(
                         'error',
-                        $e->getMessage()
+                        'Se ha producido un error interno al registrar el usuario'
                     ),
                 ]
             );
