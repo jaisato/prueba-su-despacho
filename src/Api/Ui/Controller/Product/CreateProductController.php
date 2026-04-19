@@ -47,6 +47,10 @@ final class CreateProductController extends AbstractController
 
     private SfUserWeb $userWeb;
 
+    private ?string $errorMessage = null;
+
+    private ?FormErrorDtoCollection $errors = null;
+
     #[Route(
         path: '/form/{tipoForm}',
         name: 'api_create_product_form',
@@ -139,7 +143,7 @@ final class CreateProductController extends AbstractController
                 [
                     FormErrorDto::create(
                         'error',
-                        $e->getMessage()
+                        'Se ha producido un error interno al crear el producto'
                     ),
                 ]
             );
