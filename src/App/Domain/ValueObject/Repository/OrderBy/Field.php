@@ -28,6 +28,13 @@ final class Field
             throw new InvalidArgumentException('Name can not be empty');
         }
 
+        // Validate field name to prevent SQL injection in raw SQL contexts
+        if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $name)) {
+            throw new InvalidArgumentException(
+                sprintf('Field name "%s" contains invalid characters', $name)
+            );
+        }
+
         $direction = mb_strtoupper($direction);
         if (! in_array($direction, self::DIRECTIONS, true)) {
             throw new InvalidArgumentException(
