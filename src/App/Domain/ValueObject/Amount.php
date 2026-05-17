@@ -113,7 +113,7 @@ final class Amount
                 unserialize(
                     $serialized,
                     [
-                        BigDecimal::class,
+                        'allowed_classes' => [BigDecimal::class],
                     ]
                 ),
                 self::CURRENCY,
