@@ -47,6 +47,10 @@ final class CreateProductController extends AbstractController
 
     private SfUserWeb $userWeb;
 
+    private ?FormErrorDtoCollection $errors = null;
+
+    private ?string $errorMessage = null;
+
     #[Route(
         path: '/form/{tipoForm}',
         name: 'api_create_product_form',
@@ -133,20 +137,28 @@ final class CreateProductController extends AbstractController
                     'product_id' => $product->id->asString(),
                 ],
             );
+        } catch (UserWebNotFound $e) {
+            $this->errorMessage = 'El usuario no existe';
+            $this->errors = FormErrorDtoCollection::fromElements(
+                [
+                    FormErrorDto::create(
+                        'error',
+                        'El usuario no existe'
+                    ),
+                ]
+            );
+
+            return null;
         } catch (\Throwable $e) {
             $this->errorMessage = 'No se ha podido crear el producto';
             $this->errors = FormErrorDtoCollection::fromElements(
                 [
                     FormErrorDto::create(
                         'error',
-                        $e->getMessage()
+                        'Se ha producido un error interno. Por favor, inténtelo de nuevo.'
                     ),
                 ]
             );
-
-            if ($e instanceof UserWebNotFound) {
-                $this->errorMessage = 'El usuario no existe';
-            }
 
             return null;
         }
