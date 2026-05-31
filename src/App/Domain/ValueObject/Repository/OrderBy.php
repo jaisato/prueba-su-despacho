@@ -64,7 +64,7 @@ final class OrderBy
 
     public static function fromFieldsWithDirectionsAsValuesOrNull(?array $fields): ?self
     {
-        if ($fields === null && empty($fields)) {
+        if ($fields === null || empty($fields)) {
             return null;
         }
 

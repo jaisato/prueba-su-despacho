@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use function implode;
 use function in_array;
 use function mb_strtoupper;
+use function preg_match;
 use function sprintf;
 
 final class Field
@@ -26,6 +27,12 @@ final class Field
     {
         if (empty($name)) {
             throw new InvalidArgumentException('Name can not be empty');
+        }
+
+        if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $name)) {
+            throw new InvalidArgumentException(
+                sprintf('Field name "%s" contains invalid characters', $name)
+            );
         }
 
         $direction = mb_strtoupper($direction);

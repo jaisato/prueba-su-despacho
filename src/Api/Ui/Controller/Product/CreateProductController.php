@@ -133,20 +133,28 @@ final class CreateProductController extends AbstractController
                     'product_id' => $product->id->asString(),
                 ],
             );
+        } catch (UserWebNotFound $e) {
+            $this->errorMessage = 'El usuario no existe';
+            $this->errors = FormErrorDtoCollection::fromElements(
+                [
+                    FormErrorDto::create(
+                        'error',
+                        'El usuario no existe'
+                    ),
+                ]
+            );
+
+            return null;
         } catch (\Throwable $e) {
             $this->errorMessage = 'No se ha podido crear el producto';
             $this->errors = FormErrorDtoCollection::fromElements(
                 [
                     FormErrorDto::create(
                         'error',
-                        $e->getMessage()
+                        'No se ha podido crear el producto'
                     ),
                 ]
             );
-
-            if ($e instanceof UserWebNotFound) {
-                $this->errorMessage = 'El usuario no existe';
-            }
 
             return null;
         }

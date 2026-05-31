@@ -120,24 +120,40 @@ final class SignUpController extends AbstractController
                     'user_id' => $user->id->asString(),
                 ],
             );
+        } catch (UserWebAlreadyExists $e) {
+            $this->errorMessage = 'Ya existe un usuario registrado con este correo';
+            $this->errors = FormErrorDtoCollection::fromElements(
+                [
+                    FormErrorDto::create(
+                        'error',
+                        'Ya existe un usuario registrado con este correo'
+                    ),
+                ]
+            );
+
+            return null;
+        } catch (PasswordsDoNotMatch $e) {
+            $this->errorMessage = 'Las contraseñas no coinciden';
+            $this->errors = FormErrorDtoCollection::fromElements(
+                [
+                    FormErrorDto::create(
+                        'error',
+                        'Las contraseñas no coinciden'
+                    ),
+                ]
+            );
+
+            return null;
         } catch (\Throwable $e) {
             $this->errorMessage = 'No se ha podido registrar el usuario';
             $this->errors = FormErrorDtoCollection::fromElements(
                 [
                     FormErrorDto::create(
                         'error',
-                        $e->getMessage()
+                        'No se ha podido registrar el usuario'
                     ),
                 ]
             );
-
-            if ($e instanceof UserWebAlreadyExists) {
-                $this->errorMessage = 'Ya existe un usuario registrado con este correo';
-            }
-
-            if ($e instanceof PasswordsDoNotMatch) {
-                $this->errorMessage = 'Las contraseñas no coinciden';
-            }
 
             return null;
         }
