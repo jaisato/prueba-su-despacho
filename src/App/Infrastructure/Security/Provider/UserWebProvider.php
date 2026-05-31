@@ -70,8 +70,9 @@ final class UserWebProvider implements UserProviderInterface
                 )
             );
         } catch (UserWebNotFound | IdIsNotValid $e) {
+            throw new UserNotFoundException($e->getMessage());
         }
 
-        throw new UserNotFoundException($e->getMessage());
+        throw new UserNotFoundException(sprintf('User "%s" not found.', $username));
     }
 }
