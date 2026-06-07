@@ -6,7 +6,6 @@ namespace App\Domain\ValueObject\Security;
 use App\Domain\Exception\ValueObject\Security\ClearTextPasswordIsNotValid;
 use App\Domain\Exception\ValueObject\Security\PasswordHashIsNotValid;
 use App\Domain\Exception\ValueObject\Security\PasswordsDoNotMatch;
-use RandomLib\Factory;
 use Webmozart\Assert\Assert;
 
 final class ClearTextPassword
@@ -36,14 +35,14 @@ final class ClearTextPassword
 
     public static function generate(): self
     {
-        $generator = (new Factory())->getMediumStrengthGenerator();
+        $chars = self::RANDOM_PASSWORD_CHARACTER_LIST;
+        $charsLength = strlen($chars);
+        $password = '';
+        for ($i = 0; $i < self::RANDOM_PASSWORD_LENGTH; $i++) {
+            $password .= $chars[random_int(0, $charsLength - 1)];
+        }
 
-        return new self(
-            $generator->generateString(
-                self::RANDOM_PASSWORD_LENGTH,
-                self::RANDOM_PASSWORD_CHARACTER_LIST
-            )
-        );
+        return new self($password);
     }
 
     /**
