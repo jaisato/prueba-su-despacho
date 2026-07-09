@@ -18,6 +18,11 @@ Se ha realizado una estructura en DDD con Arquitectura Hexagonal y CQRS.
 - Ejecutar las migraciones para la base de datos: php bin/console doctrine:migrations:migrate
 - Instalar los assets ejecutando: php bin/console assets:install
 
+## Nota de seguridad
+
+- El antiguo `APP_SECRET` y la `JWT_PASSPHRASE` estuvieron publicados en este repositorio y siguen en el historial de git: hay que **rotarlos**. Generar valores nuevos y únicos, definirlos en `.env.local` (no committeado) y **regenerar el par de claves JWT** con `php bin/console lexik:jwt:generate-keypair --overwrite`.
+- Recomendaciones de dependencias: actualizar `api-platform/core` de 2.x a 3.x/4.x y `doctrine/orm` de 2.x a 3.x; sustituir la librería abandonada `ircmaxell/random-lib` (por ejemplo, por `random_bytes()` nativo).
+
 ## Endpoints API y API Platform
 
 Una vez hecha la instalación y configuración, ya se pueden probar los endpoints de la API. 
