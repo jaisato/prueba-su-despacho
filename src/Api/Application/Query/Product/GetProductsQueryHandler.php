@@ -73,6 +73,7 @@ final class GetProductsQueryHandler
             return null;
         }
 
+        $ordenParam = $orden;
         if ($orden) {
             $orden = OrderBy::fromArray(
                 [
@@ -98,7 +99,7 @@ final class GetProductsQueryHandler
         $urlParams = [
             'pagina' => $pagina,
             'resultadosPorPagina' =>  $resultadosPorPagina,
-            'orden' => $orden,
+            'orden' => $ordenParam,
         ];
 
         $productsCollection = ProductDtoCollection::fromModelResults(
