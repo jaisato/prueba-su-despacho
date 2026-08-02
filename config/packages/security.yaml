@@ -14,14 +14,16 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         api_area_usuario:
-            pattern: ^/area-usuario/
+            pattern: ^/api/area-usuario/
             stateless: true
             provider: api_area_usuario
             jwt: ~
             host: '%api_domain%'
         api_auth:
             provider: api_area_usuario
+            stateless: true
             host: '%api_domain%'
+            jwt: ~
             json_login:
                 check_path: api_login
                 username_path: email
@@ -31,6 +33,7 @@ security:
 
     access_control:
         - { path: ^/api/area-usuario/, roles: ROLE_WEB, host: '%api_domain%' }
+        - { path: ^/api/form/, roles: ROLE_WEB, host: '%api_domain%' }
 
 when@test:
     security:
