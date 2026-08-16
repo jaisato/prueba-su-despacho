@@ -29,4 +29,19 @@ final class ClearTextPasswordIsNotValid extends ValueObjectException
             )
         );
     }
+
+    /**
+     * El mensaje no incluye la longitud recibida a propósito: describir la
+     * entrada rechazada en un error que puede acabar en un log es exactamente
+     * lo que no interesa cuando esa entrada es una contraseña.
+     */
+    public static function becauseExceedsMaximumLength(): self
+    {
+        return new self(
+            sprintf(
+                'Password exceeds the maximum of %s characters',
+                ClearTextPassword::MAX_PASSWORD_LENGTH
+            )
+        );
+    }
 }
