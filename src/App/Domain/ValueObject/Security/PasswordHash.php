@@ -57,7 +57,16 @@ final class PasswordHash
 
     public static function fromString(string $string): self
     {
-        self::validate(trim($string));
+        // Se validaba `trim($string)` pero se derivaba el hash de `$string` sin
+        // recortar, mientras que ClearTextPassword sí recorta antes de hashear.
+        // La misma contraseña con un espacio al final producía por tanto hashes
+        // distintos según por qué camino se registrara, y el usuario no podía
+        // volver a entrar. Se recorta una vez y se usa ese valor para las dos
+        // cosas.
+        $string = trim($string);
+
+        self::validate($string);
+
         $hash = password_hash(
             $string,
             self::PASSWORD_ALGORITHM
