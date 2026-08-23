@@ -49,3 +49,37 @@ en el camino de la autenticación. Ahora están acotadas a la mayor instalada.
 
 `ircmaxell/random-lib` se ha eliminado: era la única razón por la que estaba, y
 `ClearTextPassword::generate()` ahora usa el CSPRNG del propio PHP.
+
+## Autenticación de la API (corregido)
+
+Hasta este cambio, la configuración de seguridad no protegía ningún endpoint:
+
+- El firewall con JWT tenía `pattern: ^/area-usuario/`, y ninguna ruta cuelga de
+  ahí. Las rutas se montan bajo `%api_route_prefix%` (`/api`), así que el
+  autenticador JWT no llegaba a ejecutarse nunca.
+- `access_control` apuntaba a `^/api/area-usuario/`, que tampoco casa con nada,
+  de modo que `ROLE_WEB` no se exigía en ningún sitio -incluido
+  `/api/form/{tipoForm}`, que el README documenta como autenticado-.
+- En consecuencia toda petición caía en el firewall de login, que no tenía
+  `pattern` propio ni `stateless`, y quedaba autenticada por **cookie de sesión**
+  en lugar de por el JWT que el endpoint `/api/login` emite.
+
+Ahora hay dos firewalls (`^%api_route_prefix%/login$` para emitir el token y
+`^%api_route_prefix%` con `jwt` para el resto, ambos `stateless`) y las reglas de
+`access_control` se escriben sobre las rutas reales: público para docs, login,
+alta de usuario y listado de productos; `ROLE_WEB` para la creación de productos.
+`CreateProductController` además llama a `denyAccessUnlessGranted('ROLE_WEB')`,
+para que un patrón que deje de casar vuelva a fallar cerrado (403) en vez de
+llegar con `null` a `UserWebTransformer` y salir como un 500.
+
+El test `CreateProductControllerTest` enviaba la cabecera como `Authorization` en
+el array `server`, donde BrowserKit espera `HTTP_AUTHORIZATION`: el token nunca
+viajaba y el test pasaba gracias a la sesión. Corregido, y añadido un caso que
+comprueba que sin token la respuesta es 401/403.
+
+## Secretos en el repositorio
+
+`.env` incluye valores reales de `APP_SECRET`, `JWT_PASSPHRASE` y las
+credenciales de MySQL. Son los valores de desarrollo del docker-compose y no
+se han tocado para no romper el entorno local, pero **no deben reutilizarse en
+ningún despliegue**: ahí van por `.env.local` o por variables de entorno.

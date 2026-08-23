@@ -66,22 +66,26 @@ final class GetProductsQueryHandler
         ?string $orden
     ): ?ElementosPaginadosDto
     {
+        // countAll($filters) was called twice with the same argument and both
+        // results assigned, so the "total" and the "filtered total" were always
+        // the same number and the second query was pure cost.
         $productosTotal         = $this->productReadRepository->countAll($filters);
-        $productosTotalFiltrado = $this->productReadRepository->countAll($filters);
+        $productosTotalFiltrado = $productosTotal;
 
         if ($productosTotalFiltrado->asInt() === 0) {
             return null;
         }
 
+        // Same mapping as before, into its own variable: $orden used to be
+        // overwritten with the value object, and the raw string was still
+        // needed further down for the pagination links.
         if ($orden) {
-            $orden = OrderBy::fromArray(
-                [
-                    'createdOn' => $orden === 'fechaCreacion_desc' ? 'DESC' : 'ASC',
-                ]
-            );
+            $direction = $orden === 'fechaCreacion_desc' ? 'DESC' : 'ASC';
         } else {
-            $orden = OrderBy::fromArray(['createdOn' => 'DESC']);
+            $direction = 'DESC';
         }
+
+        $orderBy = OrderBy::fromArray(['createdOn' => $direction]);
 
         $limit = Limit::fromLimitAndOffset(
             $resultadosPorPagina,
@@ -91,15 +95,21 @@ final class GetProductsQueryHandler
         $products = $this->productReadRepository->all(
             $filters,
             $limit,
-            $orden
+            $orderBy
         );
 
         $url       = 'api_products_list';
+        // The OrderBy value object used to be passed here, having overwritten
+        // $orden. The URL generator has no way to render it, so every
+        // pagination link silently dropped the ordering the caller asked for.
         $urlParams = [
             'pagina' => $pagina,
             'resultadosPorPagina' =>  $resultadosPorPagina,
-            'orden' => $orden,
         ];
+
+        if ($orden !== null && $orden !== '') {
+            $urlParams['orden'] = $orden;
+        }
 
         $productsCollection = ProductDtoCollection::fromModelResults(
             $products
