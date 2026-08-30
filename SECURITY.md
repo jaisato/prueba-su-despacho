@@ -83,3 +83,35 @@ comprueba que sin token la respuesta es 401/403.
 credenciales de MySQL. Son los valores de desarrollo del docker-compose y no
 se han tocado para no romper el entorno local, pero **no deben reutilizarse en
 ningún despliegue**: ahí van por `.env.local` o por variables de entorno.
+
+## Avisos abiertos en `api-platform/core` 2.7.18 (revisado 2026-08-30)
+
+`composer audit --locked` señala cuatro avisos, los cuatro sobre
+`api-platform/core`. La versión fijada es **2.7.18**, la última de la rama 2.x,
+que está fuera de soporte: **ninguno tiene parche dentro de 2.x**, todos se
+corrigen a partir de 3.4.17 / 4.1.29.
+
+Contrastados uno a uno contra la configuración de este proyecto, **ninguno es
+explotable tal y como está montado hoy**:
+
+| Aviso | Por qué no aplica aquí |
+|-------|------------------------|
+| CVE-2025-31481 — se puede saltar la seguridad de las operaciones GraphQL | No hay GraphQL: `composer.lock` no incluye `webonyx/graphql-php` ni el subpaquete de GraphQL, así que la funcionalidad no está instalada. |
+| CVE-2025-31485 — un `grant` de GraphQL sobre una propiedad puede cachearse con otros objetos | Igual que el anterior. |
+| CVE-2026-49858 — fuga de atributos entre usuarios en los normalizadores de ítem de JSON:API y HAL | `config/packages/api_platform.yaml` declara únicamente `json` y `html`; los normalizadores de JSON:API y HAL no intervienen en ninguna respuesta. |
+| CVE-2026-54164 — los IRI de relación no se comprueban por tipo (confusión de tipos al desnormalizar) | Los recursos expuestos (`ProductsPaginatedDto`, `FormResponseDto`) son DTO de salida sin propiedades de relación, de modo que no hay IRI de relación que desnormalizar. |
+
+Esto **no** es motivo para dejarlo así indefinidamente. Depender de una rama sin
+soporte significa que el próximo aviso tampoco tendrá parche, y las cuatro
+mitigaciones de arriba son propiedades de la configuración actual: basta con
+habilitar GraphQL, añadir `jsonapi` o `hal` a `formats`, o exponer un recurso con
+relaciones, para que una de ellas deje de sostenerse sin que nada avise.
+
+La corrección de verdad es subir a una rama con soporte, que es una migración de
+mayor (anotaciones a atributos, metadatos de recurso, cambio de espacio de
+nombres `ApiPlatform\Core\*`) y no un `composer update`: hay que hacerla y
+probarla con la base de datos delante, no a ciegas.
+
+También quedan tres paquetes abandonados —`composer/package-versions-deprecated`,
+`doctrine/annotations` y `doctrine/cache`—, que la misma migración se lleva por
+delante.
