@@ -128,13 +128,6 @@ final class PaginacionNumeradaDto extends PaginacionDto
     ): string {
         $urlParams['pagina'] = $pagina;
 
-        var_dump($url);
-        var_dump($urlParams);
-        var_dump($urlGenerator->generate(
-            $url,
-            $urlParams
-        ));
-
         return $urlGenerator->generate(
             $url,
             $urlParams

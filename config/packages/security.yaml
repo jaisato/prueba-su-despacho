@@ -1,5 +1,4 @@
 security:
-    enable_authenticator_manager: true
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
     providers:
@@ -13,13 +12,13 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        api_area_usuario:
-            pattern: ^/area-usuario/
-            stateless: true
-            provider: api_area_usuario
-            jwt: ~
-            host: '%api_domain%'
+
+        # POST /api/login. Stateless on purpose: the point of this endpoint is
+        # to hand out a JWT, so it must not also open a session that would
+        # authenticate later requests on its own.
         api_auth:
+            pattern: ^%api_route_prefix%/login$
+            stateless: true
             provider: api_area_usuario
             host: '%api_domain%'
             json_login:
@@ -29,8 +28,32 @@ security:
                 success_handler: Api\Infrastructure\Security\Authenticator\CustomAuthenticationSuccessHandler
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
+        # Everything else under the API prefix. The pattern used to be
+        # ^/area-usuario/, which no route has ever matched: routes are mounted
+        # under %api_route_prefix% (/api), so the JWT authenticator was simply
+        # never reached and every API request fell through to the login
+        # firewall, which had no pattern of its own.
+        api:
+            pattern: ^%api_route_prefix%
+            stateless: true
+            provider: api_area_usuario
+            host: '%api_domain%'
+            jwt: ~
+
+    # Paths are matched against the real routes. The previous entry pointed at
+    # ^/api/area-usuario/, which matched nothing, so ROLE_WEB was never
+    # required anywhere - including on the endpoint the README documents as
+    # "hay que estar autenticado".
     access_control:
-        - { path: ^/api/area-usuario/, roles: ROLE_WEB, host: '%api_domain%' }
+        # API Platform's docs, entrypoint and JSON-LD contexts.
+        - { path: '^%api_route_prefix%(/(docs|contexts|index)?)?$', roles: PUBLIC_ACCESS, host: '%api_domain%' }
+        - { path: '^%api_route_prefix%/login$', roles: PUBLIC_ACCESS, host: '%api_domain%' }
+        # Sign-up: creating the account cannot itself require an account.
+        - { path: '^%api_route_prefix%/users/', roles: PUBLIC_ACCESS, host: '%api_domain%' }
+        # Public catalogue listing.
+        - { path: '^%api_route_prefix%/productos/', roles: PUBLIC_ACCESS, host: '%api_domain%' }
+        # Product creation - the one endpoint that needs a web user.
+        - { path: '^%api_route_prefix%/form/', roles: ROLE_WEB, host: '%api_domain%' }
 
 when@test:
     security:

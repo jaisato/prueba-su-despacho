@@ -43,6 +43,16 @@ final class SignUpController extends AbstractController
      */
     private ValidatorInterface $validator;
 
+    /**
+     * Both of these were written and read without ever being declared. PHP 8.2
+     * deprecates creating dynamic properties, and reading $this->errors before
+     * anything set it (an unknown {tipoForm}) raised an undefined-property
+     * warning on the way to the 400.
+     */
+    private ?string $errorMessage = null;
+
+    private ?FormErrorDtoCollection $errors = null;
+
     #[Route(
         path: '/users/{tipoForm}',
         name: 'api_signup',
