@@ -47,6 +47,16 @@ final class CreateProductController extends AbstractController
 
     private SfUserWeb $userWeb;
 
+    /**
+     * Both of these were written and read without ever being declared. PHP 8.2
+     * deprecates creating dynamic properties, and reading $this->errors before
+     * anything set it (an unknown {tipoForm}) raised an undefined-property
+     * warning on the way to the 400.
+     */
+    private ?string $errorMessage = null;
+
+    private ?FormErrorDtoCollection $errors = null;
+
     #[Route(
         path: '/form/{tipoForm}',
         name: 'api_create_product_form',
@@ -67,6 +77,13 @@ final class CreateProductController extends AbstractController
         $this->commandBusWrite = $commandBusWrite;
         $this->commandBusRead = $commandBusRead;
         $this->validator = $validator;
+
+        // Defence in depth: access_control already requires ROLE_WEB here, but
+        // this endpoint reads the authenticated user unconditionally, and a
+        // firewall pattern that stops matching (which is exactly what had
+        // happened) must fail closed with a 403 rather than reach
+        // UserWebTransformer with null and blow up as a TypeError 500.
+        $this->denyAccessUnlessGranted('ROLE_WEB');
 
         $this->userWeb       = UserWebTransformer::transform($this->getUser());
 
