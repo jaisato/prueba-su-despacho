@@ -88,18 +88,20 @@ ningún despliegue**: ahí van por `.env.local` o por variables de entorno.
 
 `composer audit --locked` señala cuatro avisos, los cuatro sobre
 `api-platform/core`. La versión fijada es **2.7.18**, la última de la rama 2.x,
-que está fuera de soporte: **ninguno tiene parche dentro de 2.x**, todos se
-corrigen a partir de 3.4.17 / 4.1.29.
+que está fuera de soporte: **ninguno tiene parche dentro de 2.x**. El umbral de
+corrección **no es el mismo para los cuatro** -va en la tabla, aviso por aviso-,
+así que un único número resume mal: sobre la rama 4.1 hace falta llegar a
+**4.1.30** para cerrarlos todos, porque 4.1.29 deja CVE-2026-54164 abierto.
 
 Contrastados uno a uno contra la configuración de este proyecto, **ninguno es
 explotable tal y como está montado hoy**:
 
-| Aviso | Por qué no aplica aquí |
-|-------|------------------------|
-| CVE-2025-31481 — se puede saltar la seguridad de las operaciones GraphQL | No hay GraphQL: `composer.lock` no incluye `webonyx/graphql-php` ni el subpaquete de GraphQL, así que la funcionalidad no está instalada. |
-| CVE-2025-31485 — un `grant` de GraphQL sobre una propiedad puede cachearse con otros objetos | Igual que el anterior. |
-| CVE-2026-49858 — fuga de atributos entre usuarios en los normalizadores de ítem de JSON:API y HAL | `config/packages/api_platform.yaml` declara únicamente `json` y `html`; los normalizadores de JSON:API y HAL no intervienen en ninguna respuesta. |
-| CVE-2026-54164 — los IRI de relación no se comprueban por tipo (confusión de tipos al desnormalizar) | Los recursos expuestos (`ProductsPaginatedDto`, `FormResponseDto`) son DTO de salida sin propiedades de relación, de modo que no hay IRI de relación que desnormalizar. |
+| Aviso | Corregido en | Por qué no aplica aquí |
+|-------|--------------|------------------------|
+| CVE-2025-31481 — se puede saltar la seguridad de las operaciones GraphQL | 3.4.17 / 4.0.22 / 4.1.5 | No hay GraphQL: `composer.lock` no incluye `webonyx/graphql-php` ni el subpaquete de GraphQL, así que la funcionalidad no está instalada. |
+| CVE-2025-31485 — un `grant` de GraphQL sobre una propiedad puede cachearse con otros objetos | 3.4.17 / 4.0.22 / 4.1.5 | Igual que el anterior. |
+| CVE-2026-49858 — fuga de atributos entre usuarios en los normalizadores de ítem de JSON:API y HAL | 4.1.29 / 4.2.25 / 4.3.8 | `config/packages/api_platform.yaml` declara únicamente `json` y `html`; los normalizadores de JSON:API y HAL no intervienen en ninguna respuesta. |
+| CVE-2026-54164 — los IRI de relación no se comprueban por tipo (confusión de tipos al desnormalizar) | **4.1.30** / 4.2.26 / 4.3.12 | Los recursos expuestos (`ProductsPaginatedDto`, `FormResponseDto`) son DTO de salida sin propiedades de relación, de modo que no hay IRI de relación que desnormalizar. |
 
 Esto **no** es motivo para dejarlo así indefinidamente. Depender de una rama sin
 soporte significa que el próximo aviso tampoco tendrá parche, y las cuatro
