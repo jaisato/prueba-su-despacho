@@ -12,7 +12,9 @@ use Api\Domain\Service\User\UserWebTransformer;
 use Api\Ui\Request\Product\CreateProductRequest;
 use App\Domain\Dto\Product\DetalleProduct;
 use App\Domain\Exception\Model\User\UserWeb\UserWebNotFound;
+use App\Domain\Exception\ValueObject\ValueObjectException;
 use App\Infrastructure\Security\User\SfUserWeb;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -57,6 +59,24 @@ final class CreateProductController extends AbstractController
 
     private ?FormErrorDtoCollection $errors = null;
 
+    private LoggerInterface $logger;
+
+    /**
+     * Las excepciones cuyo mensaje está escrito para que lo lea quien rellena el
+     * formulario. Todo lo demás -un fallo de Doctrine, un TypeError, una
+     * conexión caída- se registra y se contesta con un mensaje genérico.
+     *
+     * `ValueObjectException` entra entera porque es la base de las validaciones
+     * de los value objects ("el precio no es válido", "la descripción es
+     * demasiado larga"): describen lo que el propio llamante acaba de enviar.
+     */
+    private const MENSAJES_PARA_EL_USUARIO = [
+        ValueObjectException::class,
+        UserWebNotFound::class,
+    ];
+
+    private const ERROR_GENERICO = 'No se ha podido crear el producto. Inténtalo de nuevo más tarde.';
+
     #[Route(
         path: '/form/{tipoForm}',
         name: 'api_create_product_form',
@@ -71,12 +91,14 @@ final class CreateProductController extends AbstractController
         string             $tipoForm,
         CommandBusWrite    $commandBusWrite,
         CommandBusRead     $commandBusRead,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        LoggerInterface    $logger
     ): JsonResponse
     {
         $this->commandBusWrite = $commandBusWrite;
         $this->commandBusRead = $commandBusRead;
         $this->validator = $validator;
+        $this->logger = $logger;
 
         // Defence in depth: access_control already requires ROLE_WEB here, but
         // this endpoint reads the authenticated user unconditionally, and a
@@ -151,6 +173,25 @@ final class CreateProductController extends AbstractController
                 ],
             );
         } catch (\Throwable $e) {
+            // Mismo criterio que en SignUpController: el mensaje de la excepción
+            // sólo sale al cliente si está escrito para él. Antes salía siempre,
+            // de modo que una DriverException de Doctrine llegaba al cuerpo del
+            // 400 con la consulta y el DSN dentro. Aquí hace falta estar
+            // autenticado, así que el alcance es menor que en el registro, pero
+            // describir la infraestructura a cualquier usuario con cuenta sigue
+            // sin ser algo que esta respuesta deba hacer.
+            if (! $this->esMensajeParaElUsuario($e)) {
+                $this->logger->error(
+                    'Fallo inesperado al crear un producto',
+                    ['exception' => $e]
+                );
+
+                $this->errorMessage = self::ERROR_GENERICO;
+                $this->errors = null;
+
+                return null;
+            }
+
             $this->errorMessage = 'No se ha podido crear el producto';
             $this->errors = FormErrorDtoCollection::fromElements(
                 [
@@ -167,5 +208,20 @@ final class CreateProductController extends AbstractController
 
             return null;
         }
+    }
+
+    /**
+     * ¿El mensaje de esta excepción está escrito para quien rellena el
+     * formulario?
+     */
+    private function esMensajeParaElUsuario(\Throwable $e): bool
+    {
+        foreach (self::MENSAJES_PARA_EL_USUARIO as $clase) {
+            if ($e instanceof $clase) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

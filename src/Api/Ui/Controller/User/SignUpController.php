@@ -12,6 +12,8 @@ use Api\Ui\Request\User\SignUpUserRequest;
 use App\Domain\Dto\User\DetalleUser;
 use App\Domain\Exception\Model\User\UserWeb\UserWebAlreadyExists;
 use App\Domain\Exception\ValueObject\Security\PasswordsDoNotMatch;
+use App\Domain\Exception\ValueObject\ValueObjectException;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -53,6 +55,25 @@ final class SignUpController extends AbstractController
 
     private ?FormErrorDtoCollection $errors = null;
 
+    private LoggerInterface $logger;
+
+    /**
+     * Las excepciones cuyo mensaje está escrito para que lo lea quien rellena el
+     * formulario. Todo lo demás -un fallo de Doctrine, un TypeError, una
+     * conexión caída- se registra y se contesta con un mensaje genérico.
+     *
+     * `ValueObjectException` entra entera porque es la base de las validaciones
+     * de los value objects ("el e-mail no es válido", "el nombre es demasiado
+     * largo"): describen lo que el propio llamante acaba de enviar.
+     */
+    private const MENSAJES_PARA_EL_USUARIO = [
+        ValueObjectException::class,
+        UserWebAlreadyExists::class,
+        PasswordsDoNotMatch::class,
+    ];
+
+    private const ERROR_GENERICO = 'No se ha podido completar el registro. Inténtalo de nuevo más tarde.';
+
     #[Route(
         path: '/users/{tipoForm}',
         name: 'api_signup',
@@ -67,12 +88,14 @@ final class SignUpController extends AbstractController
         string             $tipoForm,
         CommandBusWrite    $commandBusWrite,
         CommandBusRead     $commandBusRead,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        LoggerInterface    $logger
     ): JsonResponse
     {
         $this->commandBusWrite = $commandBusWrite;
         $this->commandBusRead = $commandBusRead;
         $this->validator = $validator;
+        $this->logger = $logger;
         $postData = $this->getPostData($request);
         $formResponseDto = null;
         if ($tipoForm === self::TIPO_FORM) {
@@ -88,6 +111,21 @@ final class SignUpController extends AbstractController
         }
 
         return new JsonResponse($formResponseDto->toArray(), Response::HTTP_CREATED);
+    }
+
+    /**
+     * ¿El mensaje de esta excepción está escrito para quien rellena el
+     * formulario?
+     */
+    private function esMensajeParaElUsuario(\Throwable $e): bool
+    {
+        foreach (self::MENSAJES_PARA_EL_USUARIO as $clase) {
+            if ($e instanceof $clase) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function getPostData(Request $request): array
@@ -131,6 +169,27 @@ final class SignUpController extends AbstractController
                 ],
             );
         } catch (\Throwable $e) {
+            // El mensaje de la excepción sólo sale al cliente si está escrito
+            // para él. Antes salía siempre: este endpoint es público y sin
+            // autenticar, así que cualquier fallo inesperado -una
+            // DriverException de Doctrine con la consulta y el DSN dentro, un
+            // TypeError con la ruta del fichero, un timeout con el host y el
+            // puerto de la base de datos- se devolvía tal cual en el cuerpo del
+            // 400. Eso describe la infraestructura a quien sepa provocarlo.
+            if (! $this->esMensajeParaElUsuario($e)) {
+                // El detalle se conserva donde puede verlo quien opera el
+                // servicio, con la traza completa, en vez de en la respuesta.
+                $this->logger->error(
+                    'Fallo inesperado al registrar un usuario',
+                    ['exception' => $e]
+                );
+
+                $this->errorMessage = self::ERROR_GENERICO;
+                $this->errors = null;
+
+                return null;
+            }
+
             $this->errorMessage = 'No se ha podido registrar el usuario';
             $this->errors = FormErrorDtoCollection::fromElements(
                 [
