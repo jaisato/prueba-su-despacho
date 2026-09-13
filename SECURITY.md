@@ -117,3 +117,26 @@ probarla con la base de datos delante, no a ciegas.
 También quedan tres paquetes abandonados —`composer/package-versions-deprecated`,
 `doctrine/annotations` y `doctrine/cache`—, que la misma migración se lleva por
 delante.
+
+## Fugas de información en las respuestas de error
+
+Los dos controladores de formulario (`SignUpController` y
+`CreateProductController`) envolvían la llamada al bus en
+`catch (\Throwable $e)` y devolvían `$e->getMessage()` dentro del cuerpo del
+400, para **cualquier** excepción.
+
+Eso está bien para las excepciones de dominio, cuyo mensaje está escrito para
+quien rellena el formulario ("La contraseña y su verificacion no coinciden").
+No lo está para el resto: una `DriverException` de Doctrine lleva dentro la
+consulta y la cadena de conexión, un `TypeError` lleva la ruta del fichero y la
+firma del método, y un timeout lleva el host y el puerto de la base de datos.
+`/users/signup-user` es público y sin autenticar, así que ese texto lo podía
+leer cualquiera capaz de provocar el fallo —y provocarlo es tan barato como
+enviar un campo con un tipo inesperado.
+
+Ahora cada controlador tiene una lista explícita de las excepciones cuyo mensaje
+sale al cliente (`ValueObjectException` como base de las validaciones de value
+objects, más las de dominio que ese formulario puede lanzar). Todo lo demás se
+registra con `logger->error()` y su traza completa, y el cliente recibe un
+mensaje genérico. El detalle sigue estando —donde lo ve quien opera el
+servicio, no quien lo ataca.
