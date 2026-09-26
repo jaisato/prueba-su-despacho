@@ -45,7 +45,7 @@ final class Amount
                     new CustomContext(
                         self::SCALE
                     ),
-                    RoundingMode::HALF_UP
+                    RoundingMode::HalfUp
                 )
             );
         } catch (NumberFormatException $e) {
@@ -62,7 +62,7 @@ final class Amount
                 new CustomContext(
                     self::SCALE
                 ),
-                RoundingMode::HALF_UP
+                RoundingMode::HalfUp
             )
         );
     }
@@ -80,12 +80,15 @@ final class Amount
     {
         return new self(
             Money::of(
-                $price,
+                // brick/money 0.14 (and brick/math 0.18 underneath) no longer
+                // accept a float here; older versions cast it to string
+                // internally, so do the same before handing it over.
+                (string) $price,
                 self::CURRENCY,
                 new CustomContext(
                     self::SCALE
                 ),
-                RoundingMode::HALF_UP
+                RoundingMode::HalfUp
             )
         );
     }
@@ -214,7 +217,7 @@ final class Amount
         return new self(
             $this->value->plus(
                 $amount->value,
-                RoundingMode::HALF_UP
+                RoundingMode::HalfUp
             )
         );
     }
@@ -224,7 +227,7 @@ final class Amount
         return new self(
             $this->value->minus(
                 $amount->value,
-                RoundingMode::HALF_UP
+                RoundingMode::HalfUp
             )
         );
     }
@@ -234,7 +237,7 @@ final class Amount
         return new self(
             $this->value->multipliedBy(
                 $quantity,
-                RoundingMode::HALF_UP
+                RoundingMode::HalfUp
             )
         );
     }
