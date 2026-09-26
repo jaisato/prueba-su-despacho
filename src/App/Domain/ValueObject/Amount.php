@@ -112,8 +112,24 @@ final class Amount
             Money::of(
                 unserialize(
                     $serialized,
+                    // The second argument to unserialize() is an options array,
+                    // and the class allowlist lives under the 'allowed_classes'
+                    // key. This passed a bare list instead - [0 => BigDecimal],
+                    // which has no 'allowed_classes' key at all. PHP does not
+                    // warn about the unknown option; it simply falls back to the
+                    // default, and that default is `true`: every class allowed.
+                    // So the restriction that was clearly intended here was never
+                    // in force, and any class in the application could be
+                    // instantiated - __wakeup() and __destruct() included.
+                    //
+                    // That matters because this is the read side of the
+                    // vo_amount Doctrine type: it runs on every Amount column
+                    // loaded from the database, so anything that can write to
+                    // one of those columns gets a PHP object injection.
                     [
-                        BigDecimal::class,
+                        'allowed_classes' => [
+                            BigDecimal::class,
+                        ],
                     ]
                 ),
                 self::CURRENCY,
