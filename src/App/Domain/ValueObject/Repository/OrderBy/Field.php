@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use function implode;
 use function in_array;
 use function mb_strtoupper;
+use function preg_match;
 use function sprintf;
 
 final class Field
@@ -18,6 +19,8 @@ final class Field
         'DESC',
     ];
 
+    private const NAME_PATTERN = '/^[a-zA-Z_][a-zA-Z0-9_]*$/';
+
     private string $name;
 
     private string $direction;
@@ -26,6 +29,12 @@ final class Field
     {
         if (empty($name)) {
             throw new InvalidArgumentException('Name can not be empty');
+        }
+
+        if (! preg_match(self::NAME_PATTERN, $name)) {
+            throw new InvalidArgumentException(
+                sprintf('Name "%s" is not a valid field name', $name)
+            );
         }
 
         $direction = mb_strtoupper($direction);
