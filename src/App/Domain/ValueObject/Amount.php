@@ -45,7 +45,7 @@ final class Amount
                     new CustomContext(
                         self::SCALE
                     ),
-                    RoundingMode::HALF_UP
+                    RoundingMode::HalfUp
                 )
             );
         } catch (NumberFormatException $e) {
@@ -62,7 +62,7 @@ final class Amount
                 new CustomContext(
                     self::SCALE
                 ),
-                RoundingMode::HALF_UP
+                RoundingMode::HalfUp
             )
         );
     }
@@ -85,7 +85,7 @@ final class Amount
                 new CustomContext(
                     self::SCALE
                 ),
-                RoundingMode::HALF_UP
+                RoundingMode::HalfUp
             )
         );
     }
@@ -214,7 +214,7 @@ final class Amount
         return new self(
             $this->value->plus(
                 $amount->value,
-                RoundingMode::HALF_UP
+                RoundingMode::HalfUp
             )
         );
     }
@@ -224,7 +224,7 @@ final class Amount
         return new self(
             $this->value->minus(
                 $amount->value,
-                RoundingMode::HALF_UP
+                RoundingMode::HalfUp
             )
         );
     }
@@ -234,7 +234,7 @@ final class Amount
         return new self(
             $this->value->multipliedBy(
                 $quantity,
-                RoundingMode::HALF_UP
+                RoundingMode::HalfUp
             )
         );
     }
