@@ -80,7 +80,10 @@ final class Amount
     {
         return new self(
             Money::of(
-                $price,
+                // brick/money 0.14 (and brick/math 0.18 underneath) no longer
+                // accept a float here; older versions cast it to string
+                // internally, so do the same before handing it over.
+                (string) $price,
                 self::CURRENCY,
                 new CustomContext(
                     self::SCALE
