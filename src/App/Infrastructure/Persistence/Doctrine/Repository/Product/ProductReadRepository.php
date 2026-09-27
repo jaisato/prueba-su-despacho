@@ -12,6 +12,7 @@ use App\Infrastructure\Persistence\Doctrine\ValueObject\NameType;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\QueryBuilder;
 
 class ProductReadRepository implements \App\Domain\Repository\Doctrine\Product\ProductReadRepository
 {
@@ -50,22 +51,7 @@ class ProductReadRepository implements \App\Domain\Repository\Doctrine\Product\P
         $qb->select('product')
             ->from(Product::class, 'product');
 
-        if (array_key_exists('id', $filters)) {
-            $qb
-                ->where('product.id = :id')
-                ->setParameter('id', $filters['id']);
-        }
-
-        if (array_key_exists('not_id', $filters) && ! empty($filters['not_id'])) {
-            $qb
-                ->where('product.id != :not_id')
-                ->setParameter('not_id', $filters['not_id']);
-        }
-
-        if (array_key_exists('name', $filters)){
-            $qb->where('product.name LIKE :name')
-                ->setParameter('name', '%' . $filters['name'] . '%');
-        }
+        $this->applyFilters($qb, $filters);
 
         if ($limit !== null && $limit->hasLimit()) {
             $qb->setMaxResults($limit->limit());
@@ -97,19 +83,40 @@ class ProductReadRepository implements \App\Domain\Repository\Doctrine\Product\P
             ->select('COUNT(product.id)')
             ->from(Product::class, 'product');
 
-        if (array_key_exists('not_id', $filters)) {
+        $this->applyFilters($qb, $filters);
+
+        return Quantity::fromInt(
+            (int) $qb->getQuery()->getSingleScalarResult()
+        );
+    }
+
+    /**
+     * One place for the filters, shared by all() and countAll().
+     *
+     * all() used to chain them with where(), which replaces the previous
+     * condition instead of adding to it (so `name` silently dropped `id`), and
+     * countAll() applied a different set (no `id`, `not_id` even when empty).
+     * The total in the pagination block could therefore disagree with the rows
+     * actually returned.
+     */
+    private function applyFilters(QueryBuilder $qb, array $filters): void
+    {
+        if (array_key_exists('id', $filters)) {
+            $qb
+                ->andWhere('product.id = :id')
+                ->setParameter('id', $filters['id']);
+        }
+
+        if (array_key_exists('not_id', $filters) && ! empty($filters['not_id'])) {
             $qb
                 ->andWhere('product.id != :not_id')
                 ->setParameter('not_id', $filters['not_id']);
         }
 
-        if (array_key_exists('name', $filters)){
-            $qb->andWhere('product.name LIKE :name')
+        if (array_key_exists('name', $filters)) {
+            $qb
+                ->andWhere('product.name LIKE :name')
                 ->setParameter('name', '%' . $filters['name'] . '%', NameType::TYPE_NAME);
         }
-
-        return Quantity::fromInt(
-            (int) $qb->getQuery()->getSingleScalarResult()
-        );
     }
 }
