@@ -132,7 +132,10 @@ final class SignUpController extends AbstractController
     {
         $postData = json_decode($request->getContent(), true);
 
-        if (!$postData) {
+        // A body that is valid JSON but not an object (`"x"`, `1`, `true`)
+        // decoded to a scalar and broke the array return type: a TypeError,
+        // i.e. a 500, for what is just an invalid form submission.
+        if (!is_array($postData)) {
             $postData = [];
         }
 
