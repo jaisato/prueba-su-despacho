@@ -51,7 +51,9 @@ final class SfUserWeb implements UserInterface, PasswordAuthenticatedUserInterfa
         return $this->userWeb->name()->asString();
     }
 
-    public function eraseCredentials() {}
+    public function eraseCredentials(): void
+    {
+    }
 
     public function getUserIdentifier(): string
     {
