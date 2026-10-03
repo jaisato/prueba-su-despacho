@@ -26,7 +26,7 @@ final class ListProductsController extends AbstractController
         name: 'api_products_list',
         defaults: [
             '_api_resource_class' => ProductsPaginatedDto::class,
-            '_api_item_operation_name' => 'products_list',
+            '_api_operation_name' => 'products_list',
         ],
         // Positive, bounded integers only. Without requirements a
         // non-numeric segment reached the int parameters as a TypeError, and

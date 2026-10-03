@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Security\OpenApi;
 
-use ApiPlatform\Core\OpenApi\Factory\OpenApiFactoryInterface;
-use ApiPlatform\Core\OpenApi\Model;
-use ApiPlatform\Core\OpenApi\OpenApi;
+use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
+use ApiPlatform\OpenApi\Model;
+use ApiPlatform\OpenApi\OpenApi;
 use ArrayObject;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
@@ -62,14 +62,14 @@ final class JwtDecorator implements OpenApiFactoryInterface
                 operationId: 'postCredentialsItem',
                 tags: ['Login'],
                 responses: [
-                    '200' => [
-                        'description' => 'Get JWT token',
-                        'content' => [
+                    '200' => new Model\Response(
+                        description: 'Get JWT token',
+                        content: new ArrayObject([
                             'application/json' => [
                                 'schema' => ['$ref' => '#/components/schemas/Token'],
                             ],
-                        ],
-                    ],
+                        ]),
+                    ),
                 ],
                 summary: 'Get JWT token to login.',
                 requestBody: new Model\RequestBody(

@@ -79,7 +79,7 @@ final class SignUpController extends AbstractController
         name: 'api_signup',
         defaults: [
             '_api_resource_class' => FormResponseDto::class,
-            '_api_item_operation_name' => 'signup',
+            '_api_operation_name' => 'signup',
         ],
         methods: ['POST'],
     )]
