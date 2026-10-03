@@ -25,7 +25,10 @@ WORKDIR /var/www/html
 RUN curl -sS https://getcomposer.org/installer  | php -- --install-dir=/usr/local/bin --filename=composer
 RUN composer --version
 
-COPY ./composer.json ./symfony.lock ./
+# composer.lock incluido: sin él, el `composer install` de abajo resuelve de
+# nuevo en cada build (versiones distintas a las del lock) y, desde Composer
+# 2.9, se niega a instalar cualquier versión con advisories de seguridad.
+COPY ./composer.json ./composer.lock ./symfony.lock ./
 
 RUN composer install --no-ansi --dev --no-interaction --no-plugins --no-progress --no-scripts --no-suggest --optimize-autoloader --ignore-platform-reqs
 RUN composer dump-autoload  --dev --no-scripts -o
