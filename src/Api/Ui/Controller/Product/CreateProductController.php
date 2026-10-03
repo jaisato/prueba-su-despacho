@@ -82,7 +82,7 @@ final class CreateProductController extends AbstractController
         name: 'api_create_product_form',
         defaults: [
             '_api_resource_class' => FormResponseDto::class,
-            '_api_item_operation_name' => 'product_form',
+            '_api_operation_name' => 'product_form',
         ],
         methods: ['POST'],
     )]

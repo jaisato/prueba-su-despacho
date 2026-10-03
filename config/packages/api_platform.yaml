@@ -9,9 +9,40 @@ api_platform:
             - '%kernel.project_dir%/src/App/Infrastructure/Security/OpenApi'
     patch_formats:
         json: ['application/merge-patch+json']
+    # Solo JSON. `html` estaba aquí porque en la 2.7 era la forma de tener
+    # Swagger UI; desde la 3.2 la documentación negocia sus formatos aparte
+    # (`docs_formats`). Dejarlo además como formato de los recursos hacía que
+    # una petición `Accept: text/html` al listado, que atiende un controlador
+    # propio, acabase en 500: API Platform 4 cambia la operación por la de
+    # Swagger UI pero el controlador sigue devolviendo su DTO.
     formats:
         json: ['application/json']
+    # Los mismos formatos de documentación que servía la 2.7 (`/api/docs.json`,
+    # `Accept: application/json`, Swagger UI en HTML) más el tipo propio de
+    # OpenAPI; `json` ya no viene por defecto. El orden importa: con
+    # `Accept: */*` gana el primero, que antes era JSON.
+    docs_formats:
+        json: ['application/json']
+        jsonopenapi: ['application/vnd.openapi+json']
         html: ['text/html']
+    # Por defecto los errores se ofrecen también en JSON-LD, formato que esta
+    # API no habilita: el serializador no lo conoce y un 404 de una ruta de API
+    # Platform acababa en 500. Igual que en la 2.7, solo problem+json.
+    error_formats:
+        jsonproblem: ['application/problem+json']
+    # Los controladores de src/Api/Ui/Controller son rutas propias de Symfony
+    # marcadas con `_api_resource_class` y `_api_operation_name`: quien negocia
+    # el formato, serializa el DTO que devuelve el listado y aplica
+    # `exception_to_status` son los listeners del kernel de API Platform. En la
+    # 4.x vienen desactivados en favor de su controlador principal, que solo
+    # atiende las rutas que genera la propia librería.
+    use_symfony_listeners: true
+    # Desde la 3.0 el serializador omite por defecto las propiedades a null. El
+    # listado devolvía `"paginacion": null`, `"anterior": null`, etc., y los
+    # clientes pueden contar con esas claves: se mantiene el contrato de la 2.7.
+    defaults:
+        normalization_context:
+            skip_null_values: false
     swagger:
         api_keys:
             user_web:

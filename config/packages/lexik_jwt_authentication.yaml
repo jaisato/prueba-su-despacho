@@ -4,3 +4,12 @@ lexik_jwt_authentication:
     pass_phrase: '%env(JWT_PASSPHRASE)%'
     user_id_claim: id
     token_ttl: 7200
+
+    # API Platform >= 3.2 activa por su cuenta (prepend) esta integración, que
+    # añade a OpenAPI una operación de login deducida del firewall. Aquí el
+    # `check_path` es un nombre de ruta (`api_login`), así que la documentaba
+    # como el path literal "api_login", duplicando además el POST /api/login y
+    # el esquema bearer que ya describe JwtDecorator. Se desactiva para que la
+    # documentación siga saliendo de un único sitio.
+    api_platform:
+        enabled: false
