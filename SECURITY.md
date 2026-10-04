@@ -51,15 +51,17 @@ rama instalada: la superficie que hoy no existe es la que cubrían esos CVE.
 
 ## Paquetes abandonados
 
-`composer audit` señala tres:
+`composer audit` señala dos:
 
 - `composer/package-versions-deprecated` — sin reemplazo. Lo exige el propio
   `composer.json` (fijado a `1.11.99.2`); ningún otro paquete lo necesita.
-- `doctrine/annotations` — sustituible por atributos nativos de PHP 8. Los
-  recursos de api-platform ya usan atributos y ningún paquete lo exige: sólo
-  lo pide el propio `composer.json` (`^1.13`). Retirarlo es un cambio aparte,
-  que pasa por comprobar que no queda ninguna anotación en docblocks.
 - `doctrine/cache` — sin reemplazo directo; lo arrastra `doctrine/orm ^2.9`.
+
+`doctrine/annotations` se ha retirado. Ningún paquete lo exigía, y tampoco lo
+usaba nadie: con `framework.annotations: false` el validador no lee docblocks,
+así que las únicas anotaciones que quedaban -los `@Assert\NotBlank` de los
+formularios de alta de usuario y de producto- no se aplicaban (un campo vacío
+llegaba al comando y acababa en el error genérico). Ahora son atributos de PHP.
 
 ## Restricciones de versión
 
