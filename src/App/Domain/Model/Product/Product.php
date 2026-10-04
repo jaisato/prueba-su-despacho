@@ -57,7 +57,7 @@ class Product
 
     private function setPriceWithIva(Amount $basePrice, Iva $iva)
     {
-        $this->priceWithIva = Amount::fromFloatWithDecimals($basePrice->asFloat() * (100 + $iva->asInt()) / 100);
+        $this->priceWithIva = $basePrice->withPercentageAdded($iva->asInt());
     }
 
     /**

@@ -17,4 +17,14 @@ final class AmountIsNotValid extends ValueObjectException
             )
         );
     }
+
+    public static function becauseItsFormatWithCommaAsDecimalsIsNotValid(string $price): self
+    {
+        return new self(
+            sprintf(
+                'El formato del precio recibido, "%s", no es válido. Tiene que ser un importe positivo con coma decimal y como mucho dos decimales, por ejemplo, "6,50" o "1.234,56".',
+                $price
+            )
+        );
+    }
 }
