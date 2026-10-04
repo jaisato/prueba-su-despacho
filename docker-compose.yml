@@ -1,5 +1,9 @@
 version: "3.7"
 
+# Every published port binds to BIND_ADDRESS, 127.0.0.1 by default: the two
+# MySQL servers carry the development credentials of .env / .env.test and the
+# web container runs with Xdebug, so none of them should listen on the local
+# network. BIND_ADDRESS=0.0.0.0 (in the shell or a root .env) opens them up.
 services:
     mysql:
         container_name: products_mysql
@@ -14,7 +18,7 @@ services:
         volumes:
             - ./docker/data/mysql:/var/lib/mysql
         ports:
-            - 7306:3306
+            - "${BIND_ADDRESS:-127.0.0.1}:7306:3306"
         depends_on:
             - web
         networks:
@@ -31,7 +35,7 @@ services:
         volumes:
             - ./docker/data/mysql_test:/var/lib/mysql
         ports:
-            - 7307:3306
+            - "${BIND_ADDRESS:-127.0.0.1}:7307:3306"
         depends_on:
           - web
         networks:
@@ -46,7 +50,7 @@ services:
                 COMPOSER_DEV: ${COMPOSER_DEV:-true}
                 XDEBUG_FILE_LINK_FORMAT: ${XDEBUG_FILE_LINK_FORMAT:-}
         ports:
-            - 8070:80
+            - "${BIND_ADDRESS:-127.0.0.1}:8070:80"
         volumes:
             - .:/var/www/html
         environment:
