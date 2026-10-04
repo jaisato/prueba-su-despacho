@@ -10,6 +10,7 @@ use Api\Infrastructure\Service\Paginacion\PaginacionService;
 use App\Domain\ValueObject\Quantity;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+use function min;
 use function round;
 
 final class PaginacionNumeradaDto extends PaginacionDto
@@ -41,8 +42,11 @@ final class PaginacionNumeradaDto extends PaginacionDto
         $paginaAnterior  = null;
         $paginaSiguiente = null;
 
-        $indiceFinal  = $elementosPorPagina * $paginaActual;
-        $indiceInicio = $indiceFinal - $elementosPorPagina;
+        [$indiceInicio, $indiceFinal] = self::indices(
+            $elementosPorPagina,
+            $paginaActual,
+            $elementosTotalFiltrado->asInt()
+        );
 
         if ($paginaActual > 1) {
             $paginaAnterior = new PaginacionNumeradaItemDto(
@@ -69,7 +73,7 @@ final class PaginacionNumeradaDto extends PaginacionDto
                 [],
                 $elementosTotal->asInt(),
                 $elementosTotalFiltrado->asInt(),
-                $indiceInicio > 0 ? $indiceInicio : 1, // Cambia 0 por 1
+                $indiceInicio,
                 $indiceFinal
             );
 
@@ -111,13 +115,36 @@ final class PaginacionNumeradaDto extends PaginacionDto
             $paginas,
             $elementosTotal->asInt(),
             $elementosTotalFiltrado->asInt(),
-            $indiceInicio > 0 ? $indiceInicio : 1, // Cambia 0 por 1
+            $indiceInicio,
             $indiceFinal
         );
 
         $dto->paginaActual = $paginaActual;
 
         return $dto;
+    }
+
+    /**
+     * Posiciones (empezando en 1) del primer y del último elemento de la
+     * página, para el texto "Mostrando del X al Y de Z".
+     *
+     * Antes el inicio era el desplazamiento (0, 10, 20...) con el 0 cambiado
+     * por 1, y el final, página × tamaño sin más: la página 2 de 10 en 10 decía
+     * "del 10 al 20", y la última página o una lista corta anunciaban
+     * elementos que no existen ("del 1 al 10" de 3). Una página más allá del
+     * final no muestra ninguno: 0 y 0.
+     *
+     * @return array{int, int}
+     */
+    private static function indices(int $elementosPorPagina, int $paginaActual, int $totalFiltrado): array
+    {
+        $desplazamiento = $elementosPorPagina * ($paginaActual - 1);
+
+        if ($desplazamiento >= $totalFiltrado) {
+            return [0, 0];
+        }
+
+        return [$desplazamiento + 1, min($desplazamiento + $elementosPorPagina, $totalFiltrado)];
     }
 
     public static function buildPageUrl(

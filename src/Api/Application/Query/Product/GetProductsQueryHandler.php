@@ -15,6 +15,8 @@ use App\Domain\ValueObject\Quantity;
 use App\Domain\ValueObject\Repository\Limit;
 use App\Domain\ValueObject\Repository\OrderBy;
 
+use function is_string;
+
 final class GetProductsQueryHandler
 {
     public const MAX_PRODUCTS_PER_PAGE = 50;
@@ -85,7 +87,10 @@ final class GetProductsQueryHandler
             $direction = 'DESC';
         }
 
-        $orderBy = OrderBy::fromArray(['createdOn' => $direction]);
+        // The id breaks ties: rows created in the same second have no order of
+        // their own, so LIMIT/OFFSET could show one product on two pages and
+        // skip another.
+        $orderBy = OrderBy::fromArray(['createdOn' => $direction, 'id' => $direction]);
 
         $limit = Limit::fromLimitAndOffset(
             $resultadosPorPagina,
@@ -109,6 +114,12 @@ final class GetProductsQueryHandler
 
         if ($orden !== null && $orden !== '') {
             $urlParams['orden'] = $orden;
+        }
+
+        // Same for the name filter: the links to the other pages dropped it,
+        // so page 2 of a filtered listing was page 2 of every product.
+        if (isset($filters['name']) && is_string($filters['name'])) {
+            $urlParams['name'] = $filters['name'];
         }
 
         $productsCollection = ProductDtoCollection::fromModelResults(

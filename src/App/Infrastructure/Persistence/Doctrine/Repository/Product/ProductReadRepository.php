@@ -114,9 +114,18 @@ class ProductReadRepository implements \App\Domain\Repository\Doctrine\Product\P
         }
 
         if (array_key_exists('name', $filters)) {
+            // The search text is matched literally: `%` and `_` in it used to
+            // act as LIKE wildcards, so `?name=%` listed every product and
+            // `?name=_` anything with a name. `!` is the escape character
+            // because, unlike the backslash, it means the same on every
+            // platform (SQLite has no default escape at all).
             $qb
-                ->andWhere('product.name LIKE :name')
-                ->setParameter('name', '%' . $filters['name'] . '%', NameType::TYPE_NAME);
+                ->andWhere("product.name LIKE :name ESCAPE '!'")
+                ->setParameter(
+                    'name',
+                    '%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], (string) $filters['name']) . '%',
+                    NameType::TYPE_NAME
+                );
         }
     }
 }
