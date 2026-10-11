@@ -111,6 +111,13 @@ final class GetProductsQueryHandler
             $urlParams['orden'] = $orden;
         }
 
+        // Lo mismo con el filtro por nombre: sin él, los enlaces "siguiente",
+        // "anterior" y los números de página llevaban al listado completo,
+        // aunque el total que los acompañaba fuera el filtrado.
+        if (isset($filters['name']) && $filters['name'] !== '') {
+            $urlParams['name'] = $filters['name'];
+        }
+
         $productsCollection = ProductDtoCollection::fromModelResults(
             $products
         )->toArray();

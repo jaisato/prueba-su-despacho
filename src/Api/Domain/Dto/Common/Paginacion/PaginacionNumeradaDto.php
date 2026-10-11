@@ -10,7 +10,7 @@ use Api\Infrastructure\Service\Paginacion\PaginacionService;
 use App\Domain\ValueObject\Quantity;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-use function round;
+use function min;
 
 final class PaginacionNumeradaDto extends PaginacionDto
 {
@@ -41,8 +41,22 @@ final class PaginacionNumeradaDto extends PaginacionDto
         $paginaAnterior  = null;
         $paginaSiguiente = null;
 
-        $indiceFinal  = $elementosPorPagina * $paginaActual;
-        $indiceInicio = $indiceFinal - $elementosPorPagina;
+        // Posiciones 1-based del primer y el último elemento de la página, para
+        // el texto "Mostrando del X al Y de Z". Antes el inicio era el offset
+        // (0-based: la página 2 de 10 en 10 decía "del 10 al 20", y sólo la
+        // primera se corregía de 0 a 1) y el final era siempre
+        // pagina * porPagina, también en la última página: 23 elementos de 10
+        // en 10 acababan en "del 20 al 30 de 23".
+        $offset       = $elementosPorPagina * ($paginaActual - 1);
+        $indiceInicio = $offset + 1;
+        $indiceFinal  = min($offset + $elementosPorPagina, $elementosTotalFiltrado->asInt());
+
+        // Una página más allá de la última no muestra nada: 0 y 0, en lugar de
+        // un rango invertido ("del 31 al 23").
+        if ($indiceInicio > $indiceFinal) {
+            $indiceInicio = 0;
+            $indiceFinal  = 0;
+        }
 
         if ($paginaActual > 1) {
             $paginaAnterior = new PaginacionNumeradaItemDto(
@@ -69,7 +83,7 @@ final class PaginacionNumeradaDto extends PaginacionDto
                 [],
                 $elementosTotal->asInt(),
                 $elementosTotalFiltrado->asInt(),
-                $indiceInicio > 0 ? $indiceInicio : 1, // Cambia 0 por 1
+                $indiceInicio,
                 $indiceFinal
             );
 
@@ -111,7 +125,7 @@ final class PaginacionNumeradaDto extends PaginacionDto
             $paginas,
             $elementosTotal->asInt(),
             $elementosTotalFiltrado->asInt(),
-            $indiceInicio > 0 ? $indiceInicio : 1, // Cambia 0 por 1
+            $indiceInicio,
             $indiceFinal
         );
 
