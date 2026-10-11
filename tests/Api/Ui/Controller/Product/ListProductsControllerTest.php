@@ -117,7 +117,9 @@ class ListProductsControllerTest extends ControllerTest
 
         $commandBus = static::getContainer()->get(CommandBusWrite::class);
         for ($i = 1; $i <= $count; $i++) {
-            $commandBus->handle(new CreateProductCommand($user->id()->asString(), $marca . ' ' . $i, 'Descripción', '1,75', 21));
+            $commandBus->handle(
+                new CreateProductCommand($user->id()->asString(), $marca . ' ' . $i, 'Descripción', '1,75', 21)
+            );
         }
 
         return $marca;

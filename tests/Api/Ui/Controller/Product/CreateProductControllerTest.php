@@ -146,7 +146,10 @@ class CreateProductControllerTest extends ControllerTest
         // e-mail value object, so it creates a second one, and the login then
         // fails on an e-mail that matches two rows.
         $email = 'tipos.producto.' . bin2hex(random_bytes(6)) . '@example.com';
-        UserWebFactory::createOne(['emailAddress' => EmailAddress::fromString($email), 'password' => PasswordHash::fromString('123456789')]);
+        UserWebFactory::createOne([
+            'emailAddress' => EmailAddress::fromString($email),
+            'password' => PasswordHash::fromString('123456789'),
+        ]);
 
         $this->client->request(
             'POST',
