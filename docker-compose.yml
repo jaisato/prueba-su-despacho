@@ -13,8 +13,11 @@ services:
             MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-products_root_password}
         volumes:
             - ./docker/data/mysql:/var/lib/mysql
+        # Solo en loopback: publicado como "7306:3306" el MySQL de desarrollo
+        # (con las contraseñas por defecto de arriba si no hay .env.local)
+        # escuchaba en todas las interfaces del host.
         ports:
-            - 7306:3306
+            - "127.0.0.1:7306:3306"
         depends_on:
             - web
         networks:
@@ -31,7 +34,7 @@ services:
         volumes:
             - ./docker/data/mysql_test:/var/lib/mysql
         ports:
-            - 7307:3306
+            - "127.0.0.1:7307:3306"
         depends_on:
           - web
         networks:
@@ -45,8 +48,10 @@ services:
             args:
                 COMPOSER_DEV: ${COMPOSER_DEV:-true}
                 XDEBUG_FILE_LINK_FORMAT: ${XDEBUG_FILE_LINK_FORMAT:-}
+        # La aplicación corre con APP_ENV=dev (profiler, trazas, Xdebug): en
+        # loopback, como las bases de datos.
         ports:
-            - 8070:80
+            - "127.0.0.1:8070:80"
         volumes:
             - .:/var/www/html
         environment:
