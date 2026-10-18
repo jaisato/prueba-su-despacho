@@ -1,7 +1,11 @@
 # Estado de seguridad de las dependencias
 
 `composer audit --locked` sobre `composer.lock` **no informa de ningún advisory**
-(revisado el 2026-10-03). Los cuatro que había estaban todos en
+(revisado el 2026-10-18). El 2026-10-18 se cerró
+[CVE-2026-109413](https://symfony.com/cve-2026-109413) (recursión sin límite en el
+lexer inline de `symfony/yaml`: un documento YAML puede tumbar el proceso; corregido
+en 6.4.45) subiendo `symfony/yaml` de 6.4.43 a **6.4.48**. La aplicación solo lee
+YAML de configuración propia, no de usuarios. Los cuatro de 2026-10-03 estaban todos en
 `api-platform/core` 2.7.18, la última versión de una rama sin soporte, y se han
 cerrado migrando a **4.3.21** (`^4.1` en `composer.json`):
 
