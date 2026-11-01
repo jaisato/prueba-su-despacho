@@ -2,6 +2,7 @@
 
 namespace App\Domain\Model\Product;
 
+use App\Domain\Exception\ValueObject\AmountIsNotValid;
 use App\Domain\Model\User\User;
 use App\Domain\Model\User\UserWeb;
 use App\Domain\ValueObject\Amount;
@@ -49,15 +50,26 @@ class Product
         private Iva $iva
     )
     {
+        if ($basePrice->isNegative()) {
+            throw AmountIsNotValid::becauseItIsNegative($basePrice->asStringWithDotAsDecimalSeparator());
+        }
+
         $this->setPriceWithIva($basePrice, $iva);
 
         $this->createdOn = DateTime::now();
         $this->updatedOn = DateTime::now();
     }
 
-    private function setPriceWithIva(Amount $basePrice, Iva $iva)
+    /**
+     * Antes se calculaba en float (`base * (100 + iva) / 100`). Con importes
+     * normales el redondeo de (string) float lo disimulaba, pero un double sólo
+     * tiene 15-17 cifras significativas: a partir de unos 10^12 € se perdían
+     * los céntimos (1.234.567.890.123,45 € + 21 % daba ...049,40 € en vez de
+     * ...049,37 €). Ahora es aritmética decimal exacta con un solo redondeo.
+     */
+    private function setPriceWithIva(Amount $basePrice, Iva $iva): void
     {
-        $this->priceWithIva = Amount::fromFloatWithDecimals($basePrice->asFloat() * (100 + $iva->asInt()) / 100);
+        $this->priceWithIva = $basePrice->increasedByPercentage($iva->asInt());
     }
 
     /**

@@ -13,6 +13,7 @@ use Brick\Money\Exception\MoneyMismatchException;
 use Brick\Money\Money;
 
 use function number_format;
+use function preg_match;
 use function serialize;
 use function str_replace;
 use function unserialize;
@@ -24,6 +25,9 @@ final class Amount
     private const CURRENCY = 'EUR';
 
     private const SCALE = 2;
+
+    /** "1234", "1234,5", "1.234,50", "-6,50"; no "1.77" ni "12.34.5". */
+    private const COMMA_DECIMALS_FORMAT = '/^-?(\d+|\d{1,3}(\.\d{3})+)(,\d+)?$/';
 
     private Money $value;
 
@@ -98,11 +102,37 @@ final class Amount
         return $this->value->isZero();
     }
 
+    public function isNegative(): bool
+    {
+        return $this->value->isNegative();
+    }
+
+    /**
+     * El importe incrementado en un porcentaje entero (p. ej. el IVA),
+     * redondeado al céntimo una sola vez y sin pasar por float.
+     */
+    public function increasedByPercentage(int $percentage): self
+    {
+        return new self(
+            $this->value
+                ->multipliedBy(100 + $percentage, RoundingMode::HalfUp)
+                ->dividedBy(100, RoundingMode::HalfUp)
+        );
+    }
+
     /**
      * @throws AmountIsNotValid
      */
     public static function fromStringWithCommaAsDecimals(string $price): self
     {
+        // Los puntos sólo pueden separar millares (grupos de tres cifras) y la
+        // coma, si está, separa los decimales. Antes se quitaba cualquier punto
+        // sin mirar dónde estaba, así que "1.77" o "10.5" -el formato que
+        // proponía el propio mensaje de error- se guardaban como 177 y 105.
+        if (preg_match(self::COMMA_DECIMALS_FORMAT, $price) !== 1) {
+            throw AmountIsNotValid::becauseItsCommaFormatIsNotValid($price);
+        }
+
         $price = str_replace('.', '', $price);
         $price = str_replace(',', '.', $price);
 

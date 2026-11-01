@@ -12,10 +12,17 @@
             <discriminator-mapping value="web" class="App\Domain\Model\User\UserWeb" />
         </discriminator-map>
 
-        <indexes>
-            <!-- Create index to speed queries when importing -->
-            <index name="email_address_idx" columns="email_address" />
-        </indexes>
+        <!--
+            Un email identifica a una cuenta: es el nombre de usuario del login.
+            El índice era normal, así que nada impedía dos filas con el mismo
+            email (dos registros simultáneos pasan los dos la comprobación
+            previa del handler) y, en cuanto había dos, el login no encontraba
+            a ninguno: ofEmailAddressOrFail() trata el NonUniqueResult como
+            "no existe" y la cuenta quedaba inaccesible.
+        -->
+        <unique-constraints>
+            <unique-constraint name="email_address_uniq" columns="email_address" />
+        </unique-constraints>
 
         <id name="id" type="vo_id">
         </id>

@@ -18,14 +18,15 @@ final class SignUpUserRequest extends UserRequest
 
     public static function fromArray(array $data, ValidatorInterface $validator): self
     {
-        $request = new static(
-            $data['nombre'] ?? null,
-            $data['email'] ?? null,
-            $data['password'] ?? null,
-            $data['passwordRepeat'] ?? null
-        );
+        $request = new static();
+
+        $request->nombre         = $request->stringField($data, 'nombre');
+        $request->email          = $request->stringField($data, 'email');
+        $request->password       = $request->stringField($data, 'password');
+        $request->passwordRepeat = $request->stringField($data, 'passwordRepeat');
 
         $request->validate($validator);
+        $request->addInvalidTypeErrors();
 
         return $request;
     }

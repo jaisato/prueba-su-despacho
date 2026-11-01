@@ -18,14 +18,15 @@ final class CreateProductRequest extends ProductRequest
 
     public static function fromArray(array $data, ValidatorInterface $validator): self
     {
-        $request = new static(
-            $data['name'] ?? null,
-            $data['description'] ?? null,
-            $data['price'] ?? null,
-            $data['iva'] ?? null
-        );
+        $request = new static();
+
+        $request->name        = $request->stringField($data, 'name');
+        $request->description = $request->stringField($data, 'description');
+        $request->price       = $request->stringField($data, 'price');
+        $request->iva         = $request->intField($data, 'iva');
 
         $request->validate($validator);
+        $request->addInvalidTypeErrors();
 
         return $request;
     }
