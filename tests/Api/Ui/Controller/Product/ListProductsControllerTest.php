@@ -4,7 +4,16 @@ declare(strict_types=1);
 
 namespace Tests\Api\Ui\Controller\Product;
 
+use App\Domain\ValueObject\Name;
+use App\Infrastructure\Factory\Product\ProductFactory;
+use App\Infrastructure\Factory\User\UserWebFactory;
 use Tests\Api\Ui\Controller\ControllerTest;
+
+use function array_column;
+use function bin2hex;
+use function http_build_query;
+use function json_decode;
+use function random_bytes;
 
 /**
  * @group listProducts
@@ -35,6 +44,41 @@ class ListProductsControllerTest extends ControllerTest
             ['pagina' => 1, 'paginacion' => null, 'products' => []],
             json_decode((string) $this->client->getResponse()->getContent(), true, flags: JSON_THROW_ON_ERROR)
         );
+    }
+
+    /**
+     * El filtro `name` busca un trozo del nombre, letra por letra: `%` y `_`
+     * son caracteres como cualquier otro. Iban sin escapar dentro del LIKE,
+     * así que buscar "100%" devolvía también "1000 ..." (el `%` casaba con
+     * cualquier cosa) y "a_b" devolvía "axb".
+     *
+     * @dataProvider likeWildcards
+     */
+    public function testTheNameFilterTakesLikeWildcardsLiterally(
+        string $wanted,
+        string $lookalike,
+        string $filter
+    ): void {
+        $token = bin2hex(random_bytes(8));
+        $user  = UserWebFactory::createOne();
+        ProductFactory::createOne(['name' => Name::fromString($token . $wanted), 'user' => $user]);
+        ProductFactory::createOne(['name' => Name::fromString($token . $lookalike), 'user' => $user]);
+
+        $this->client->request('GET', '/api/productos/1/10?' . http_build_query(['name' => $token . $filter]));
+
+        $this->assertResponseIsSuccessful();
+        $body = json_decode((string) $this->client->getResponse()->getContent(), true, flags: JSON_THROW_ON_ERROR);
+        self::assertSame([$token . $wanted], array_column($body['products'], 'name'));
+    }
+
+    /**
+     * @return iterable<string, array{string, string, string}>
+     */
+    public static function likeWildcards(): iterable
+    {
+        yield 'percent sign' => [' 100% algodón', ' 1000 algodón', ' 100%'];
+        yield 'underscore' => [' talla_m', ' tallaxm', ' talla_m'];
+        yield 'backslash' => [' a\\b', ' ab', ' a\\b'];
     }
 
     /**

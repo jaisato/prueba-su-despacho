@@ -55,8 +55,11 @@ final class ProductFactory extends ModelFactory
             'name' => Name::fromString(self::faker()->name()),
             'description' => Description::fromString(self::faker()->paragraph),
             'iva' => Iva::fromInt(21),
-            'basePrize' => Amount::fromStringWithCommaAsDecimals('1,75'),
-            'prizeWithIva' => Amount::fromFloatWithDecimals(1.75 * 1.21),
+            // Los nombres son los del constructor de Product. Con 'basePrize'
+            // Foundry no encontraba el argumento 'basePrice' y la factoría no
+            // podía crear ningún producto; el precio con IVA no se pasa
+            // porque lo calcula el propio Product a partir del base y el IVA.
+            'basePrice' => Amount::fromStringWithCommaAsDecimals('1,75'),
             'user' => UserWebFactory::random(),
         ];
     }

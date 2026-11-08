@@ -91,6 +91,15 @@ class ProductReadRepository implements \App\Domain\Repository\Doctrine\Product\P
     }
 
     /**
+     * Escapa los comodines de LIKE (y el propio carácter de escape) para usar
+     * el texto como literal en un LIKE ... ESCAPE '!'.
+     */
+    private static function escapeLike(string $value): string
+    {
+        return str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $value);
+    }
+
+    /**
      * One place for the filters, shared by all() and countAll().
      *
      * all() used to chain them with where(), which replaces the previous
@@ -114,9 +123,14 @@ class ProductReadRepository implements \App\Domain\Repository\Doctrine\Product\P
         }
 
         if (array_key_exists('name', $filters)) {
+            // `name` busca un trozo literal del nombre. `%` y `_` son
+            // comodines de LIKE y MySQL usa además `\` como escape por
+            // defecto, así que sin escaparlos "100%" casaba con "1000 ...",
+            // "a_b" con "axb" y "a\b" con "ab". Se escapan con un carácter
+            // sin otro significado y se declara con ESCAPE.
             $qb
-                ->andWhere('product.name LIKE :name')
-                ->setParameter('name', '%' . $filters['name'] . '%', NameType::TYPE_NAME);
+                ->andWhere("product.name LIKE :name ESCAPE '!'")
+                ->setParameter('name', '%' . self::escapeLike((string) $filters['name']) . '%', NameType::TYPE_NAME);
         }
     }
 }
