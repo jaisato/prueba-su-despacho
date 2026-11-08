@@ -13,6 +13,8 @@ use App\Domain\Dto\User\DetalleUser;
 use App\Domain\Exception\Model\User\UserWeb\UserWebAlreadyExists;
 use App\Domain\Exception\ValueObject\Security\PasswordsDoNotMatch;
 use App\Domain\Exception\ValueObject\ValueObjectException;
+use App\Domain\ValueObject\EmailAddress;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -172,6 +174,18 @@ final class SignUpController extends AbstractController
                 ],
             );
         } catch (\Throwable $e) {
+            // Dos registros simultáneos con el mismo email pasan los dos la
+            // comprobación previa del handler; el índice único del email
+            // (email_address_uniq) para al segundo cuando el bus hace flush.
+            // Para quien lo envía es el mismo caso que llegar después, y se
+            // contesta igual: antes acababa en el error genérico ("inténtalo
+            // más tarde", que tampoco iba a funcionar) y en el log como fallo
+            // inesperado. El email es la única restricción única de la tabla
+            // además de la clave primaria, que es un UUID recién generado.
+            if ($e instanceof UniqueConstraintViolationException) {
+                $e = UserWebAlreadyExists::withEmailAddress(EmailAddress::fromString($request->email));
+            }
+
             // El mensaje de la excepción sólo sale al cliente si está escrito
             // para él. Antes salía siempre: este endpoint es público y sin
             // autenticar, así que cualquier fallo inesperado -una
