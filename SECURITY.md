@@ -1,7 +1,15 @@
 # Estado de seguridad de las dependencias
 
 `composer audit --locked` sobre `composer.lock` **no informa de ningún advisory**
-(revisado el 2026-10-18). El 2026-10-18 se cerró
+(revisado el 2026-11-08). El 2026-11-08 se cerraron los 16 avisos publicados el
+2026-11-04 contra Symfony 6.4.49 (entre ellos CVE-2026-118514, HEAD saltándose el
+`methods` de `access_control`; CVE-2026-118515, `UploadedFile` construidos por el
+Serializer a partir de datos de la petición; CVE-2026-118516, placeholders de host
+que casan con el principio del path; y el `ScopingHttpClient` que enviaba sus
+credenciales a otros orígenes) subiendo `symfony/*` a **6.4.50**. Los componentes
+transitivos que habían quedado en 7.x (`cache`, `security-core`, `security-http`,
+`filesystem`...) vuelven a la 6.4 que fija `extra.symfony.require`; entre ellos
+`symfony/doctrine-bridge`, que estaba en 7.3, una rama ya sin soporte. El 2026-10-18 se cerró
 [CVE-2026-109413](https://symfony.com/cve-2026-109413) (recursión sin límite en el
 lexer inline de `symfony/yaml`: un documento YAML puede tumbar el proceso; corregido
 en 6.4.45) subiendo `symfony/yaml` de 6.4.43 a **6.4.48**. La aplicación solo lee
