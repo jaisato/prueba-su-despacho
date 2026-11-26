@@ -112,6 +112,9 @@ class ListProductsControllerTest extends ControllerTest
         self::assertCount(1, $body['products']);
         self::assertStringStartsWith($token, $body['products'][0]['name']);
         self::assertSame(3, $body['paginacion']['totalFiltrado']);
+        // La última página, a medias: del 3 al 3 de 3, no del 2 al 4.
+        self::assertSame(3, $body['paginacion']['indiceInicio']);
+        self::assertSame(3, $body['paginacion']['indiceFinal']);
     }
 
     /**
