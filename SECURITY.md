@@ -2,17 +2,18 @@
 
 `composer audit --locked` sobre `composer.lock` **no informa de ningún advisory**
 (revisado el 2026-11-26). El 2026-11-26 se cerraron 21 avisos contra Symfony 6.4.50
-y Twig 3.30 subiendo `symfony/*` a **6.4.51** y `twig/twig` a **3.31.1**. Los que
-tocan a lo que usa este proyecto: CVE-2026-133753 (la estrategia `unanimous` daba
-por buena una regla de `access_control` con que casara uno solo de sus roles),
-CVE-2026-134790 (redirecciones del login a otro host con dominio de cookie de
-sesión), CVE-2026-133745 (redirecciones de barra final y de esquema a rutas que
-empiezan por `//`), CVE-2026-133743, CVE-2026-133746 y CVE-2026-133754 (URLs
-generadas que acaban en otro host: los enlaces de la paginación salen del
-`UrlGenerator`) y CVE-2026-133752 (el Serializer no aplicaba `#[Ignore]` a la clase
-elegida por un discriminador). Los demás son del `NoPrivateNetworkHttpClient`, el
-proxy de `HttpClient`, el `CsvEncoder`, el *remember-me* de Doctrine y el *sandbox*
-de Twig, que la aplicación no usa. El 2026-11-08 se cerraron los 16 avisos publicados el
+y Twig 3.30 subiendo `symfony/*` a **6.4.51** y `twig/twig` a **3.31.1**. Los que más
+se acercan a este proyecto son los del enrutado: CVE-2026-133746 (el `UrlGenerator`
+aún podía generar URLs hacia otro host; las rutas de la API llevan `host` y los
+enlaces de la paginación salen de él) y CVE-2026-133745 (redirecciones de barra
+final y de esquema a rutas que empiezan por `//`). El resto no alcanza a la
+configuración actual: la decisión de acceso usa la estrategia por defecto
+(`affirmative`; CVE-2026-133753 es de `unanimous`), el login es `json_login` sin
+estado ni redirecciones (CVE-2026-134790), las rutas no tienen *placeholders* de host
+(CVE-2026-133754), el Serializer no usa discriminadores ni `CsvEncoder`
+(CVE-2026-133752, CVE-2026-133761) y no hay `HttpClient`, *remember-me* ni *sandbox*
+de Twig. Se cierran igualmente: están en componentes que la aplicación carga.
+El 2026-11-08 se cerraron los 16 avisos publicados el
 2026-11-04 contra Symfony 6.4.49 (entre ellos CVE-2026-118514, HEAD saltándose el
 `methods` de `access_control`; CVE-2026-118515, `UploadedFile` construidos por el
 Serializer a partir de datos de la petición; CVE-2026-118516, placeholders de host
