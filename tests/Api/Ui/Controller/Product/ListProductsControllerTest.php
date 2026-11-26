@@ -13,7 +13,11 @@ use function array_column;
 use function bin2hex;
 use function http_build_query;
 use function json_decode;
+use function parse_str;
+use function parse_url;
 use function random_bytes;
+
+use const PHP_URL_QUERY;
 
 /**
  * @group listProducts
@@ -69,6 +73,45 @@ class ListProductsControllerTest extends ControllerTest
         $this->assertResponseIsSuccessful();
         $body = json_decode((string) $this->client->getResponse()->getContent(), true, flags: JSON_THROW_ON_ERROR);
         self::assertSame([$token . $wanted], array_column($body['products'], 'name'));
+    }
+
+    /**
+     * Los enlaces de la paginación son los del mismo listado: llevan el
+     * filtro `name` (y el `orden`) con el que se pidió la página. Antes solo
+     * llevaban el orden, así que la página 2 de `?name=x` era la página 2 de
+     * todos los productos mientras los totales seguían siendo los del filtro.
+     */
+    public function testPaginationLinksKeepTheNameFilterAndTheOrder(): void
+    {
+        $token = bin2hex(random_bytes(8));
+        $user  = UserWebFactory::createOne();
+        foreach (['uno', 'dos', 'tres'] as $sufijo) {
+            ProductFactory::createOne(['name' => Name::fromString($token . ' ' . $sufijo), 'user' => $user]);
+        }
+
+        $this->client->request('GET', '/api/productos/1/2?' . http_build_query([
+            'name'  => $token,
+            'orden' => 'fechaCreacion_asc',
+        ]));
+
+        $this->assertResponseIsSuccessful();
+        $content    = (string) $this->client->getResponse()->getContent();
+        $paginacion = json_decode($content, true, flags: JSON_THROW_ON_ERROR)['paginacion'];
+
+        $urls = [$paginacion['siguiente']['url'], ...array_column($paginacion['paginas'], 'url')];
+        self::assertCount(3, $urls);
+        foreach ($urls as $url) {
+            parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+            self::assertSame(['name' => $token, 'orden' => 'fechaCreacion_asc'], $query, $url);
+        }
+
+        $this->client->request('GET', $paginacion['siguiente']['url']);
+
+        $this->assertResponseIsSuccessful();
+        $body = json_decode((string) $this->client->getResponse()->getContent(), true, flags: JSON_THROW_ON_ERROR);
+        self::assertCount(1, $body['products']);
+        self::assertStringStartsWith($token, $body['products'][0]['name']);
+        self::assertSame(3, $body['paginacion']['totalFiltrado']);
     }
 
     /**
