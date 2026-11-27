@@ -1,7 +1,19 @@
 # Estado de seguridad de las dependencias
 
 `composer audit --locked` sobre `composer.lock` **no informa de ningún advisory**
-(revisado el 2026-11-08). El 2026-11-08 se cerraron los 16 avisos publicados el
+(revisado el 2026-11-26). El 2026-11-26 se cerraron 21 avisos contra Symfony 6.4.50
+y Twig 3.30 subiendo `symfony/*` a **6.4.51** y `twig/twig` a **3.31.1**. Los que más
+se acercan a este proyecto son los del enrutado: CVE-2026-133746 (el `UrlGenerator`
+aún podía generar URLs hacia otro host; las rutas de la API llevan `host` y los
+enlaces de la paginación salen de él) y CVE-2026-133745 (redirecciones de barra
+final y de esquema a rutas que empiezan por `//`). El resto no alcanza a la
+configuración actual: la decisión de acceso usa la estrategia por defecto
+(`affirmative`; CVE-2026-133753 es de `unanimous`), el login es `json_login` sin
+estado ni redirecciones (CVE-2026-134790), las rutas no tienen *placeholders* de host
+(CVE-2026-133754), el Serializer no usa discriminadores ni `CsvEncoder`
+(CVE-2026-133752, CVE-2026-133761) y no hay `HttpClient`, *remember-me* ni *sandbox*
+de Twig. Se cierran igualmente: están en componentes que la aplicación carga.
+El 2026-11-08 se cerraron los 16 avisos publicados el
 2026-11-04 contra Symfony 6.4.49 (entre ellos CVE-2026-118514, HEAD saltándose el
 `methods` de `access_control`; CVE-2026-118515, `UploadedFile` construidos por el
 Serializer a partir de datos de la petición; CVE-2026-118516, placeholders de host
@@ -63,7 +75,7 @@ rama instalada: la superficie que hoy no existe es la que cubrían esos CVE.
 
 ## Paquetes abandonados
 
-`composer audit` señala tres:
+`composer audit` señala cuatro:
 
 - `composer/package-versions-deprecated` — sin reemplazo. Lo exige el propio
   `composer.json` (fijado a `1.11.99.2`); ningún otro paquete lo necesita.
@@ -72,6 +84,9 @@ rama instalada: la superficie que hoy no existe es la que cubrían esos CVE.
   lo pide el propio `composer.json` (`^1.13`). Retirarlo es un cambio aparte,
   que pasa por comprobar que no queda ninguna anotación en docblocks.
 - `doctrine/cache` — sin reemplazo directo; lo arrastra `doctrine/orm ^2.9`.
+- `doctrine/common` — igual: lo exige `doctrine/orm ^2.9`. Packagist lo marcó
+  abandonado después del 2026-11-08; el lock del 2026-11-26 ya lo recoge (misma
+  versión, 3.5.0).
 
 ## Restricciones de versión
 

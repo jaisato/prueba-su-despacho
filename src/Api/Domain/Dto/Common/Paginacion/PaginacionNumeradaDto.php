@@ -10,6 +10,7 @@ use Api\Infrastructure\Service\Paginacion\PaginacionService;
 use App\Domain\ValueObject\Quantity;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+use function min;
 use function round;
 
 final class PaginacionNumeradaDto extends PaginacionDto
@@ -41,8 +42,17 @@ final class PaginacionNumeradaDto extends PaginacionDto
         $paginaAnterior  = null;
         $paginaSiguiente = null;
 
-        $indiceFinal  = $elementosPorPagina * $paginaActual;
-        $indiceInicio = $indiceFinal - $elementosPorPagina;
+        // The first and last element of the page, counted from 1 ("Mostrando
+        // del 21 al 25 de 25"). They used to be (page - 1) * size and
+        // page * size: page 2 of ten started at 10, and the last page (or the
+        // only one) ended on a multiple of the page size whatever was left.
+        // A page past the last one shows nothing: 0 and 0.
+        $desplazamiento = $elementosPorPagina * ($paginaActual - 1);
+        $totalFiltrado  = $elementosTotalFiltrado->asInt();
+        $indiceInicio   = $desplazamiento < $totalFiltrado ? $desplazamiento + 1 : 0;
+        $indiceFinal    = $desplazamiento < $totalFiltrado
+            ? min($desplazamiento + $elementosPorPagina, $totalFiltrado)
+            : 0;
 
         if ($paginaActual > 1) {
             $paginaAnterior = new PaginacionNumeradaItemDto(
@@ -69,7 +79,7 @@ final class PaginacionNumeradaDto extends PaginacionDto
                 [],
                 $elementosTotal->asInt(),
                 $elementosTotalFiltrado->asInt(),
-                $indiceInicio > 0 ? $indiceInicio : 1, // Cambia 0 por 1
+                $indiceInicio,
                 $indiceFinal
             );
 
@@ -111,7 +121,7 @@ final class PaginacionNumeradaDto extends PaginacionDto
             $paginas,
             $elementosTotal->asInt(),
             $elementosTotalFiltrado->asInt(),
-            $indiceInicio > 0 ? $indiceInicio : 1, // Cambia 0 por 1
+            $indiceInicio,
             $indiceFinal
         );
 

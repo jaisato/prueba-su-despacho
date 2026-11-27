@@ -15,6 +15,8 @@ use App\Domain\ValueObject\Quantity;
 use App\Domain\ValueObject\Repository\Limit;
 use App\Domain\ValueObject\Repository\OrderBy;
 
+use function is_string;
+
 final class GetProductsQueryHandler
 {
     public const MAX_PRODUCTS_PER_PAGE = 50;
@@ -106,6 +108,16 @@ final class GetProductsQueryHandler
             'pagina' => $pagina,
             'resultadosPorPagina' =>  $resultadosPorPagina,
         ];
+
+        // The links lead to the other pages of this same listing, so they
+        // carry its filters too. Only the ordering used to travel: "next" on
+        // ?name=x pointed at page 2 of every product, while the totals (and
+        // the number of pages) were those of the filter.
+        foreach ($filters as $filter => $value) {
+            if (is_string($value) && $value !== '') {
+                $urlParams[$filter] = $value;
+            }
+        }
 
         if ($orden !== null && $orden !== '') {
             $urlParams['orden'] = $orden;
