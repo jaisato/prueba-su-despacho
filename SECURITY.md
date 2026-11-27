@@ -75,7 +75,7 @@ rama instalada: la superficie que hoy no existe es la que cubrían esos CVE.
 
 ## Paquetes abandonados
 
-`composer audit` señala tres:
+`composer audit` señala cuatro:
 
 - `composer/package-versions-deprecated` — sin reemplazo. Lo exige el propio
   `composer.json` (fijado a `1.11.99.2`); ningún otro paquete lo necesita.
@@ -84,6 +84,9 @@ rama instalada: la superficie que hoy no existe es la que cubrían esos CVE.
   lo pide el propio `composer.json` (`^1.13`). Retirarlo es un cambio aparte,
   que pasa por comprobar que no queda ninguna anotación en docblocks.
 - `doctrine/cache` — sin reemplazo directo; lo arrastra `doctrine/orm ^2.9`.
+- `doctrine/common` — igual: lo exige `doctrine/orm ^2.9`. Packagist lo marcó
+  abandonado después del 2026-11-08; el lock del 2026-11-26 ya lo recoge (misma
+  versión, 3.5.0).
 
 ## Restricciones de versión
 
